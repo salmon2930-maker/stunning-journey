@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Workout Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0b1020;
+      --bg2:#121933;
+      --card:rgba(255,255,255,.08);
+      --text:#f6f8ff;
+      --muted:#aab4d6;
+      --line:rgba(255,255,255,.10);
+      --primary:#7c5cff;
+      --primary-2:#2dd4bf;
+      --danger:#ff6b81;
+      --success:#2dd4bf;
+      --warning:#f6c760;
+      --shadow:0 12px 40px rgba(0,0,0,.32);
+      --radius:24px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background:
+      radial-gradient(1200px 600px at 0% -10%, rgba(124,92,255,.28), transparent 55%),
+      radial-gradient(900px 600px at 100% 0%, rgba(45,212,191,.16), transparent 45%),
+      linear-gradient(180deg, #0a0f1f 0%, #10172e 100%);
+      color:var(--text);
+      font-family:'Inter',system-ui,sans-serif;
+      min-height:100%;
+    }
+
+    body{padding-bottom:calc(88px + var(--safe-bottom))}
+    .app-shell{max-width:980px;margin:0 auto;padding:18px 16px 0}
+
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 2px 18px
+    }
+
+    .brand h1{margin:0;font-size:1.75rem;letter-spacing:-.04em;font-weight:800}
+    .brand p{margin:6px 0 0;color:var(--muted);font-size:.96rem}
+
+    .pill{
+      border:1px solid var(--line);background:rgba(255,255,255,.06);border-radius:999px;
+      padding:10px 14px;color:var(--text);font-weight:600;backdrop-filter:blur(14px);box-shadow:var(--shadow);white-space:nowrap
+    }
+
+    .screen{display:none;animation:fade .18s ease}
+    .screen.active{display:block}
+    @keyframes fade{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+    .hero{
+      background:linear-gradient(135deg, rgba(124,92,255,.26), rgba(45,212,191,.14));
+      border:1px solid var(--line);border-radius:28px;padding:22px;box-shadow:var(--shadow);
+      backdrop-filter:blur(16px);position:relative;overflow:hidden;margin-bottom:16px
+    }
+
+    .hero::after{
+      content:"";position:absolute;inset:auto -60px -60px auto;width:180px;height:180px;border-radius:50%;
+      background:radial-gradient(circle, rgba(255,255,255,.18), transparent 62%);pointer-events:none
+    }
+
+    .hero h2{margin:0;font-size:1.45rem;line-height:1.06;letter-spacing:-.03em}
+    .hero p{margin:10px 0 0;color:#d7ddf4;max-width:48ch}
+
+    .grid{display:grid;gap:14px}
+    .grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    @media (max-width:760px){
+      .grid.two,.grid.three{grid-template-columns:1fr}
+    }
+
+    .card{
+      background:var(--card);border:1px solid var(--line);border-radius:24px;padding:16px;
+      backdrop-filter:blur(16px);box-shadow:var(--shadow)
+    }
+
+    .card h3{margin:0 0 6px;font-size:1.05rem;letter-spacing:-.02em}
+    .sub{color:var(--muted);font-size:.92rem;margin:0 0 14px}
+
+    .stat{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;border-radius:20px;
+      background:rgba(255,255,255,.05);border:1px solid var(--line)
+    }
+
+    .stat strong{font-size:1.55rem;letter-spacing:-.04em;display:block}
+    .stat span{color:var(--muted);font-size:.92rem}
+
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      border:none;border-radius:16px;padding:14px 16px;font-weight:700;font-size:.98rem;cursor:pointer;
+      transition:transform .14s ease, opacity .14s ease, background .14s ease
+    }
+    .btn:active{transform:translateY(1px) scale(.995)}
+    .btn-primary{background:linear-gradient(135deg, var(--primary), #9d7cff);color:white;box-shadow:0 10px 24px rgba(124,92,255,.35)}
+    .btn-secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--line)}
+    .btn-success{background:linear-gradient(135deg, #1fbdab, #2dd4bf);color:#07241f}
+    .btn-danger{background:rgba(255,107,129,.18);color:#ffd9df;border:1px solid rgba(255,107,129,.3)}
+    .btn-small{padding:10px 12px;border-radius:14px;font-size:.86rem;font-weight:700}
+    .btn-tiny{padding:8px 10px;border-radius:12px;font-size:.78rem;font-weight:700}
+
+    .section-title{
+      display:flex;align-items:end;justify-content:space-between;gap:12px;margin:8px 0 10px
+    }
+    .section-title h2{margin:0;font-size:1.2rem;letter-spacing:-.03em}
+    .section-title p{margin:0;color:var(--muted);font-size:.92rem}
+
+    .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .field-grid.three{grid-template-columns:1.2fr .9fr .9fr}
+    .field-grid.four{grid-template-columns:1fr 1fr 1fr 1fr}
+    @media (max-width:760px){
+      .field-grid,.field-grid.three,.field-grid.four{grid-template-columns:1fr}
+    }
+
+    label{display:block;font-size:.85rem;color:#d7ddf4;margin-bottom:8px;font-weight:600}
+    input,select,textarea{
+      width:100%;border:none;background:rgba(255,255,255,.06);border:1px solid var(--line);
+      border-radius:16px;color:var(--text);padding:14px 14px;font:inherit;outline:none
+    }
+    textarea{min-height:92px;resize:vertical}
+    input::placeholder,textarea::placeholder{color:#8e99be}
+    option{background:#10172e;color:white}
+
+    .chip-row{display:flex;gap:8px;overflow:auto;padding-bottom:2px;scrollbar-width:none}
+    .chip-row::-webkit-scrollbar{display:none}
+    .chip{
+      white-space:nowrap;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.06);
+      color:var(--text);padding:10px 14px;font-weight:700;cursor:pointer
+    }
+    .chip.active{background:linear-gradient(135deg, rgba(124,92,255,.34), rgba(45,212,191,.18));border-color:rgba(255,255,255,.18)}
+
+    .library-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    @media (max-width:700px){.library-toolbar{grid-template-columns:1fr}}
+
+    .exercise-list{display:grid;gap:12px}
+    .exercise-card{
+      padding:14px;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      border:1px solid var(--line);box-shadow:var(--shadow)
+    }
+
+    .exercise-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .exercise-head h4{margin:0;font-size:1.05rem;letter-spacing:-.02em}
+
+    .tag-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+    .tag{
+      font-size:.75rem;font-weight:700;color:#d7ddf4;padding:8px 10px;border-radius:999px;
+      background:rgba(255,255,255,.06);border:1px solid var(--line)
+    }
+    .tag.accent{background:linear-gradient(135deg, rgba(124,92,255,.30), rgba(45,212,191,.16))}
+    .tag.warning{background:rgba(246,199,96,.16);border-color:rgba(246,199,96,.32);color:#ffeab0}
+
+    .demo-box{
+      margin-top:12px;border-radius:20px;background:linear-gradient(135deg, rgba(124,92,255,.16), rgba(45,212,191,.08));
+      border:1px solid var(--line);padding:12px
+    }
+
+    .demo-stage{
+      height:220px;width:100%;border-radius:16px;position:relative;overflow:hidden;
+      background:radial-gradient(circle at 30% 10%, rgba(255,255,255,.12), transparent 38%), linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.14));
+      border:1px solid rgba(255,255,255,.06)
+    }
+
+    .demo-stage svg{width:100%;height:100%;display:block}
+    .demo-gif{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+    }
+
+    .demo-caption{display:grid;gap:8px;margin-top:10px}
+    .demo-caption p{margin:0;color:#dce3ff;font-size:.92rem}
+    .demo-steps{margin:0;padding-left:18px;color:#dce3ff;font-size:.9rem}
+
+    .builder-exercise{
+      padding:14px;border-radius:24px;background:rgba(255,255,255,.06);border:1px solid var(--line);margin-top:12px;
+      box-shadow:var(--shadow)
+    }
+
+    .builder-top{
+      display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start;margin-bottom:10px
+    }
+
+    @media (max-width:760px){
+      .builder-top{grid-template-columns:1fr}
+    }
+
+    .exercise-title-wrap{display:grid;gap:10px}
+
+    .exercise-title-btn{
+      background:transparent;border:none;color:var(--text);padding:0;display:flex;align-items:center;gap:10px;
+      font:inherit;cursor:pointer;text-align:left
+    }
+    .exercise-title-btn h4{margin:0;font-size:1.02rem;letter-spacing:-.02em}
+    .chev{font-size:1rem;opacity:.9;transition:transform .18s ease}
+    .chev.closed{transform:rotate(-90deg)}
+
+    .builder-meta{display:flex;flex-wrap:wrap;gap:8px}
+    .builder-body{display:grid;gap:12px}
+
+    .builder-toolbar{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px
+    }
+    @media (max-width:760px){.builder-toolbar{grid-template-columns:1fr}}
+
+    .set-table{display:grid;gap:10px}
+    .set-card{
+      padding:12px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid var(--line)
+    }
+
+    .set-row{
+      display:grid;grid-template-columns:72px repeat(5,minmax(0,1fr)) auto;gap:8px;align-items:center
+    }
+
+    @media (max-width:880px){
+      .set-row{grid-template-columns:repeat(2,1fr)}
+      .set-row .set-label{grid-column:1/-1}
+      .set-row .remove-set{grid-column:1/-1;width:100%}
+    }
+
+    .set-label{
+      color:#d7ddf4;font-weight:800;text-align:center;background:rgba(255,255,255,.05);
+      border:1px solid var(--line);border-radius:14px;padding:12px 8px
+    }
+
+    .muted{color:var(--muted);font-size:.9rem}
+    .tiny{font-size:.78rem;color:var(--muted)}
+    .empty{
+      text-align:center;color:var(--muted);padding:30px 16px;border:1px dashed rgba(255,255,255,.18);
+      border-radius:20px;background:rgba(255,255,255,.03)
+    }
+
+    .workout-card{
+      padding:16px;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      border:1px solid var(--line);display:grid;gap:12px
+    }
+
+    .workout-meta{display:flex;gap:8px;flex-wrap:wrap}
+    .exercise-mini{
+      padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);display:grid;gap:6px
+    }
+    .exercise-mini strong{font-size:.95rem}
+    .exercise-mini span{color:var(--muted);font-size:.85rem}
+
+    .calendar-shell{
+      display:grid;grid-template-columns:340px minmax(0,1fr);gap:14px
+    }
+    @media (max-width:900px){
+      .calendar-shell{grid-template-columns:1fr}
+    }
+
+    .calendar-controls{display:grid;gap:14px}
+    .calendar-month{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px
+    }
+    .calendar-month h3{margin:0;font-size:1.08rem}
+
+    .calendar-grid-wrap{
+      background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:24px;padding:14px;backdrop-filter:blur(16px);box-shadow:var(--shadow)
+    }
+
+    .weekday-row,.calendar-grid{
+      display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px
+    }
+
+    .weekday{
+      text-align:center;color:var(--muted);font-size:.78rem;font-weight:800;padding:8px 4px
+    }
+
+    .day-cell{
+      min-height:116px;border-radius:18px;padding:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);
+      display:grid;grid-template-rows:auto 1fr auto;gap:8px;cursor:pointer;transition:transform .14s ease, border-color .14s ease, background .14s ease
+    }
+
+    .day-cell:hover{transform:translateY(-1px)}
+    .day-cell.other-month{opacity:.42}
+    .day-cell.selected{border-color:rgba(124,92,255,.55);background:linear-gradient(180deg, rgba(124,92,255,.18), rgba(255,255,255,.04))}
+    .day-cell.today{box-shadow:0 0 0 1px rgba(45,212,191,.45) inset}
+    .day-number{font-weight:800;font-size:.9rem}
+    .day-events{display:grid;gap:6px;align-content:start}
+
+    .event-pill{
+      font-size:.72rem;font-weight:700;padding:7px 8px;border-radius:12px;
+      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+    }
+    .event-pill.saved{background:linear-gradient(135deg, rgba(124,92,255,.28), rgba(124,92,255,.12))}
+    .event-pill.lesmills{background:linear-gradient(135deg, rgba(45,212,191,.24), rgba(45,212,191,.10))}
+    .event-pill.more{background:rgba(255,255,255,.06);color:var(--muted)}
+
+    .selected-day-list{display:grid;gap:10px}
+    .scheduled-item{
+      padding:12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid var(--line);display:grid;gap:8px
+    }
+
+    .modal-backdrop{
+      position:fixed;inset:0;background:rgba(4,7,14,.66);backdrop-filter:blur(8px);display:none;
+      align-items:center;justify-content:center;padding:18px;z-index:100
+    }
+
+    .modal-backdrop.open{display:flex}
+    .modal{
+      width:min(760px, 100%);max-height:90vh;overflow:auto;
+      background:linear-gradient(180deg, rgba(18,25,51,.96), rgba(10,15,31,.98));
+      border:1px solid var(--line);border-radius:26px;padding:16px;box-shadow:var(--shadow)
+    }
+
+    .tabbar{
+      position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(10px + var(--safe-bottom));
+      background:linear-gradient(180deg, rgba(7,10,18,.1), rgba(7,10,18,.92) 22%, rgba(7,10,18,.96));backdrop-filter:blur(16px);z-index:20
+    }
+
+    .tabs{
+      max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;
+      background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:24px;padding:8px;box-shadow:var(--shadow)
+    }
+
+    .tab{
+      border:none;background:transparent;color:#9ba7ca;border-radius:18px;padding:12px 8px;cursor:pointer;
+      display:grid;gap:4px;justify-items:center;font-weight:700;font-size:.76rem
+    }
+
+    .tab .icon{font-size:1.1rem;line-height:1}
+    .tab.active{
+      color:white;background:linear-gradient(135deg, rgba(124,92,255,.32), rgba(45,212,191,.18));
+      border:1px solid rgba(255,255,255,.1)
+    }
+
+    .footer-space{height:8px}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Workout Builder</h1>
+        <p>Build workouts, organize your library, and plan your training calendar.</p>
+      </div>
+      <div class="pill" id="savedCountPill">0 saved</div>
+    </div>
+
+    <section id="homeScreen" class="screen active">
+      <div class="hero">
+        <h2>Your workout builder, now with scheduling and a custom exercise library.</h2>
+        <p>Browse the library, add your own exercises with GIF demos, build smarter workouts with supersets and circuits, save them, and schedule them on a real calendar with Les Mills classes.</p>
+      </div>
+
+      <div class="grid two">
+        <div class="card">
+          <h3>Quick start</h3>
+          <p class="sub">Jump straight into building or planning your week.</p>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="switchScreen('builderScreen')">Create workout</button>
+            <button class="btn btn-secondary" onclick="switchScreen('libraryScreen')">Manage library</button>
+            <button class="btn btn-secondary" onclick="switchScreen('calendarScreen')">Open calendar</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Stats</h3>
+          <p class="sub">A quick snapshot of what is saved and scheduled.</p>
+          <div class="grid">
+            <div class="stat"><div><strong id="homeWorkoutCount">0</strong><span>Saved workouts</span></div><div>💾</div></div>
+            <div class="stat"><div><strong id="homeExerciseCount">0</strong><span>Total library exercises</span></div><div>📚</div></div>
+            <div class="stat"><div><strong id="homeCalendarCount">0</strong><span>Calendar items</span></div><div>📅</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <h2>Starter templates</h2>
+        <p>Load one and customize it.</p>
+      </div>
+
+      <div class="grid three">
+        <div class="card">
+          <h3>Push Day</h3>
+          <p class="sub">Chest, shoulders, triceps with compounds first.</p>
+          <button class="btn btn-small btn-primary" onclick="loadTemplate('push')">Load template</button>
+        </div>
+        <div class="card">
+          <h3>Pull Day</h3>
+          <p class="sub">Back and biceps with room for accessories.</p>
+          <button class="btn btn-small btn-primary" onclick="loadTemplate('pull')">Load template</button>
+        </div>
+        <div class="card">
+          <h3>Leg Day</h3>
+          <p class="sub">Quads, hamstrings, glutes, calves, and core.</p>
+          <button class="btn btn-small btn-primary" onclick="loadTemplate('legs')">Load template</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="libraryScreen" class="screen">
+      <div class="section-title">
+        <h2>Exercise library</h2>
+        <p>Built-in movements plus your own custom entries with GIF demos.</p>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:12px;">
+        <button class="btn btn-primary" onclick="openExerciseModal()">➕ Add custom exercise</button>
+      </div>
+
+      <div class="library-toolbar">
+        <input id="searchInput" type="text" placeholder="Search exercises..." />
+        <select id="sortSelect">
+          <option value="name">Sort by name</option>
+          <option value="difficulty">Sort by difficulty</option>
+          <option value="equipment">Sort by equipment</option>
+        </select>
+      </div>
+
+      <div class="chip-row" id="muscleChips"></div>
+      <div class="exercise-list" id="exerciseList"></div>
+      <div class="footer-space"></div>
+    </section>
+
+    <section id="builderScreen" class="screen">
+      <div class="section-title">
+        <h2>Workout builder</h2>
+        <p>Cleaner exercise cards, plus supersets and circuits.</p>
+      </div>
+
+      <div class="card">
+        <div class="field-grid">
+          <div>
+            <label for="workoutName">Workout name</label>
+            <input id="workoutName" type="text" placeholder="Upper Body Strength" />
+          </div>
+          <div>
+            <label for="workoutDay">Day / split</label>
+            <input id="workoutDay" type="text" placeholder="Monday / Push" />
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div>
+            <label for="workoutGoal">Goal</label>
+            <select id="workoutGoal">
+              <option>Hypertrophy</option>
+              <option>Strength</option>
+              <option>General fitness</option>
+              <option>Athletic performance</option>
+              <option>Conditioning</option>
+            </select>
+          </div>
+          <div>
+            <label for="workoutDifficulty">Difficulty</label>
+            <select id="workoutDifficulty">
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="workoutNotes">Workout notes</label>
+          <textarea id="workoutNotes" placeholder="Focus on controlled eccentrics, 2–3 RIR on compounds, shorter rest on accessories..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Add exercise</h3>
+        <p class="sub">Choose from the library or make your own custom movement.</p>
+
+        <div class="field-grid three">
+          <div>
+            <label for="builderExerciseSelect">Exercise</label>
+            <select id="builderExerciseSelect"></select>
+          </div>
+          <div>
+            <label for="builderDefaultSets">Starting sets</label>
+            <input id="builderDefaultSets" type="number" min="1" max="10" value="3" />
+          </div>
+          <div>
+            <label for="builderExerciseMode">Source</label>
+            <select id="builderExerciseMode">
+              <option value="library">Library exercise</option>
+              <option value="custom">Custom exercise</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="customExerciseFields" style="display:none; margin-top:12px;">
+          <div class="field-grid">
+            <div>
+              <label for="customExerciseName">Custom exercise name</label>
+              <input id="customExerciseName" type="text" placeholder="Cable Y Raise" />
+            </div>
+            <div>
+              <label for="customExerciseMuscle">Muscle group</label>
+              <select id="customExerciseMuscle"></select>
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <div>
+              <label for="customExerciseEquipment">Equipment</label>
+              <input id="customExerciseEquipment" type="text" placeholder="Cable machine" />
+            </div>
+            <div>
+              <label for="customExerciseDifficulty">Difficulty</label>
+              <select id="customExerciseDifficulty">
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row" style="margin-top:12px;">
+          <button class="btn btn-primary" onclick="addExerciseToBuilder()">Add to workout</button>
+          <button class="btn btn-secondary" onclick="switchScreen('libraryScreen')">Browse library first</button>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <h2>Current workout</h2>
+        <p>Collapse, reorder, and group exercises into supersets or circuits.</p>
+      </div>
+
+      <div id="builderWorkoutList"></div>
+
+      <div class="btn-row" style="margin:14px 0 24px;">
+        <button class="btn btn-success" onclick="saveWorkout()">Save workout</button>
+        <button class="btn btn-secondary" onclick="clearBuilder()">Clear builder</button>
+      </div>
+      <div class="footer-space"></div>
+    </section>
+
+    <section id="workoutsScreen" class="screen">
+      <div class="section-title">
+        <h2>Saved workouts</h2>
+        <p>Your routines stay saved in this browser.</p>
+      </div>
+      <div id="savedWorkouts"></div>
+      <div class="footer-space"></div>
+    </section>
+
+    <section id="calendarScreen" class="screen">
+      <div class="section-title">
+        <h2>Training calendar</h2>
+        <p>Plan saved workouts or Les Mills classes on a real month grid.</p>
+      </div>
+
+      <div class="calendar-shell">
+        <div class="calendar-controls">
+          <div class="card">
+            <h3>Schedule item</h3>
+            <p class="sub">Pick a date on the calendar, then add a saved workout or class.</p>
+
+            <div>
+              <label for="selectedCalendarDate">Selected date</label>
+              <input id="selectedCalendarDate" type="date" />
+            </div>
+
+            <div style="margin-top:12px;">
+              <label for="calendarItemType">Item type</label>
+              <select id="calendarItemType">
+                <option value="saved">Saved workout</option>
+                <option value="lesmills">Les Mills</option>
+              </select>
+            </div>
+
+            <div style="margin-top:12px;" id="savedWorkoutPickerWrap">
+              <label for="calendarWorkoutSelect">Saved workout</label>
+              <select id="calendarWorkoutSelect"></select>
+            </div>
+
+            <div style="margin-top:12px; display:none;" id="lesMillsPickerWrap">
+              <label for="calendarLesMillsSelect">Les Mills class</label>
+              <select id="calendarLesMillsSelect"></select>
+            </div>
+
+            <div class="btn-row" style="margin-top:12px;">
+              <button class="btn btn-primary" onclick="scheduleSelectedItem()">Add to date</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Items on selected day</h3>
+            <p class="sub">Tap a day to inspect and manage its schedule.</p>
+            <div id="selectedDayItems" class="selected-day-list">
+              <div class="empty">Pick a date to see what is scheduled.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="calendar-grid-wrap">
+          <div class="calendar-month">
+            <div class="btn-row">
+              <button class="btn btn-small btn-secondary" onclick="changeCalendarMonth(-1)">← Prev</button>
+              <button class="btn btn-small btn-secondary" onclick="goToTodayMonth()">Today</button>
+              <button class="btn btn-small btn-secondary" onclick="changeCalendarMonth(1)">Next →</button>
+            </div>
+            <h3 id="calendarMonthLabel">Month Year</h3>
+          </div>
+
+          <div class="weekday-row">
+            <div class="weekday">Sun</div>
+            <div class="weekday">Mon</div>
+            <div class="weekday">Tue</div>
+            <div class="weekday">Wed</div>
+            <div class="weekday">Thu</div>
+            <div class="weekday">Fri</div>
+            <div class="weekday">Sat</div>
+          </div>
+
+          <div id="calendarGrid" class="calendar-grid"></div>
+        </div>
+      </div>
+
+      <div class="footer-space"></div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="exerciseModalBackdrop">
+    <div class="modal">
+      <div class="section-title">
+        <h2 id="exerciseModalTitle">Add custom exercise</h2>
+        <p>Custom entries are saved in this browser.</p>
+      </div>
+
+      <div class="card" style="margin:0;">
+        <div class="field-grid">
+          <div>
+            <label for="libExerciseName">Exercise name</label>
+            <input id="libExerciseName" type="text" placeholder="Cable Y Raise" />
+          </div>
+          <div>
+            <label for="libExerciseMuscle">Muscle group</label>
+            <input id="libExerciseMuscle" type="text" placeholder="Shoulders" />
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div>
+            <label for="libExerciseEquipment">Equipment</label>
+            <input id="libExerciseEquipment" type="text" placeholder="Cable machine" />
+          </div>
+          <div>
+            <label for="libExerciseDifficulty">Difficulty</label>
+            <select id="libExerciseDifficulty">
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label for="libExerciseGif">GIF demo URL</label>
+          <input id="libExerciseGif" type="text" placeholder="https://example.com/exercise-demo.gif" />
+        </div>
+
+        <div style="margin-top:12px;">
+          <label for="libExerciseCues">Coaching cues</label>
+          <textarea id="libExerciseCues" placeholder="One cue per line"></textarea>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label for="libExerciseSteps">Steps</label>
+          <textarea id="libExerciseSteps" placeholder="One step per line"></textarea>
+        </div>
+
+        <div class="btn-row" style="margin-top:14px;">
+          <button class="btn btn-success" onclick="saveLibraryExercise()">Save exercise</button>
+          <button class="btn btn-secondary" onclick="closeExerciseModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tabs">
+      <button class="tab active" data-screen="homeScreen" onclick="switchScreen('homeScreen', this)">
+        <span class="icon">🏠</span><span>Home</span>
+      </button>
+      <button class="tab" data-screen="libraryScreen" onclick="switchScreen('libraryScreen', this)">
+        <span class="icon">📚</span><span>Library</span>
+      </button>
+      <button class="tab" data-screen="builderScreen" onclick="switchScreen('builderScreen', this)">
+        <span class="icon">🧱</span><span>Builder</span>
+      </button>
+      <button class="tab" data-screen="workoutsScreen" onclick="switchScreen('workoutsScreen', this)">
+        <span class="icon">💾</span><span>Workouts</span>
+      </button>
+      <button class="tab" data-screen="calendarScreen" onclick="switchScreen('calendarScreen', this)">
+        <span class="icon">📅</span><span>Calendar</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const BASE_EXERCISES = [
+      {name:"Barbell Bench Press", muscle:"Chest", equipment:"Barbell", difficulty:"Intermediate", type:"compound", demo:"press", gifUrl:"", cues:["Set shoulder blades back and down.","Lower to mid-chest with control.","Press up while keeping wrists stacked."], steps:["Lie with eyes under the bar.","Unrack and brace your torso.","Lower until elbows are just below the bench line.","Drive the bar back up in a slight arc."], isCustom:false},
+      {name:"Incline Dumbbell Press", muscle:"Chest", equipment:"Dumbbells", difficulty:"Beginner", type:"compound", demo:"press", gifUrl:"", cues:["Keep feet planted.","Lower dumbbells evenly.","Press up without banging them together."], steps:["Set bench to a low incline.","Start dumbbells at shoulder level.","Lower slowly until elbows are near 90°.","Press back up over the upper chest."], isCustom:false},
+      {name:"Push-Up", muscle:"Chest", equipment:"Bodyweight", difficulty:"Beginner", type:"compound", demo:"pushup", gifUrl:"", cues:["Keep body in one straight line.","Hands just outside shoulder width.","Push the floor away hard."], steps:["Set hands on floor under shoulders.","Brace glutes and core.","Lower chest toward the floor.","Press to full lockout."], isCustom:false},
+      {name:"Cable Chest Fly", muscle:"Chest", equipment:"Cable machine", difficulty:"Beginner", type:"isolation", demo:"fly", gifUrl:"", cues:["Soft bend in the elbows.","Bring hands together in an arc.","Control the stretch."], steps:["Set cables slightly above shoulder height.","Step forward into a split stance.","Sweep hands together in front of your chest.","Return with control."], isCustom:false},
+      {name:"Machine Chest Press", muscle:"Chest", equipment:"Machine", difficulty:"Beginner", type:"compound", demo:"press", gifUrl:"", cues:["Keep shoulders down.","Drive handles forward evenly.","Avoid shrugging."], steps:["Adjust seat so handles line up with chest.","Grip handles and brace your torso.","Press forward until arms extend.","Return slowly to start."], isCustom:false},
+
+      {name:"Lat Pulldown", muscle:"Back", equipment:"Cable machine", difficulty:"Beginner", type:"compound", demo:"pulldown", gifUrl:"", cues:["Pull elbows toward your ribs.","Keep chest lifted.","Do not yank with momentum."], steps:["Grip the bar just outside shoulder width.","Lean back slightly.","Pull the bar to upper chest.","Control the ascent back up."], isCustom:false},
+      {name:"Seated Cable Row", muscle:"Back", equipment:"Cable machine", difficulty:"Beginner", type:"compound", demo:"row", gifUrl:"", cues:["Lead with elbows.","Pause the squeeze.","Stay tall through the torso."], steps:["Sit tall with knees slightly bent.","Grab the handle and brace.","Row to the lower ribs.","Return under control."], isCustom:false},
+      {name:"One-Arm Dumbbell Row", muscle:"Back", equipment:"Dumbbell", difficulty:"Beginner", type:"compound", demo:"row", gifUrl:"", cues:["Flat back.","Pull elbow toward hip.","Avoid twisting."], steps:["Support one hand on a bench.","Let the dumbbell hang under shoulder.","Row toward your hip.","Lower slowly."], isCustom:false},
+      {name:"Pull-Up", muscle:"Back", equipment:"Pull-up bar", difficulty:"Advanced", type:"compound", demo:"pullup", gifUrl:"", cues:["Start from a dead hang.","Drive elbows down.","Keep ribs from flaring."], steps:["Grip the bar slightly wider than shoulders.","Hang with arms fully extended.","Pull chest toward bar.","Lower under control."], isCustom:false},
+      {name:"Romanian Deadlift", muscle:"Back", equipment:"Barbell", difficulty:"Intermediate", type:"compound", demo:"hinge", gifUrl:"", cues:["Hips back first.","Keep bar close.","Neutral spine throughout."], steps:["Stand tall with bar at thighs.","Push hips back with soft knees.","Lower until hamstrings are loaded.","Drive hips through to stand."], isCustom:false},
+
+      {name:"Dumbbell Shoulder Press", muscle:"Shoulders", equipment:"Dumbbells", difficulty:"Beginner", type:"compound", demo:"press", gifUrl:"", cues:["Brace ribs down.","Press slightly inward.","Control the descent."], steps:["Start seated or standing with dumbbells at shoulders.","Brace core.","Press overhead.","Lower back to shoulder height."], isCustom:false},
+      {name:"Lateral Raise", muscle:"Shoulders", equipment:"Dumbbells", difficulty:"Beginner", type:"isolation", demo:"lateral", gifUrl:"", cues:["Raise with elbows and hands together.","Stop around shoulder height.","Avoid swinging."], steps:["Stand tall with dumbbells at sides.","Lift arms out to the sides.","Pause briefly near shoulder level.","Lower slowly."], isCustom:false},
+      {name:"Rear Delt Fly", muscle:"Shoulders", equipment:"Dumbbells", difficulty:"Beginner", type:"isolation", demo:"fly-rear", gifUrl:"", cues:["Hinge slightly forward.","Open arms wide.","Squeeze upper back gently."], steps:["Hinge at the hips.","Hold dumbbells under chest.","Open arms out wide.","Return with control."], isCustom:false},
+      {name:"Arnold Press", muscle:"Shoulders", equipment:"Dumbbells", difficulty:"Intermediate", type:"compound", demo:"press", gifUrl:"", cues:["Rotate smoothly.","Keep elbows under hands.","Do not overarch."], steps:["Start palms facing you.","Rotate outward as you press up.","Reach overhead.","Reverse the motion to lower."], isCustom:false},
+      {name:"Face Pull", muscle:"Shoulders", equipment:"Cable machine", difficulty:"Beginner", type:"isolation", demo:"facepull", gifUrl:"", cues:["Pull rope toward nose or forehead.","Elbows high.","Finish with external rotation."], steps:["Set rope at face height.","Step back and brace.","Pull rope apart toward your face.","Return slowly."], isCustom:false},
+
+      {name:"Barbell Curl", muscle:"Biceps", equipment:"Barbell", difficulty:"Beginner", type:"isolation", demo:"curl", gifUrl:"", cues:["Elbows stay near the torso.","Squeeze at the top.","No back swing."], steps:["Stand tall with bar at thighs.","Curl toward shoulders.","Pause briefly.","Lower slowly."], isCustom:false},
+      {name:"Hammer Curl", muscle:"Biceps", equipment:"Dumbbells", difficulty:"Beginner", type:"isolation", demo:"curl", gifUrl:"", cues:["Neutral grip.","Keep shoulders relaxed.","Control every rep."], steps:["Hold dumbbells by your sides.","Curl with palms facing each other.","Pause near shoulders.","Lower under control."], isCustom:false},
+      {name:"Incline Dumbbell Curl", muscle:"Biceps", equipment:"Dumbbells", difficulty:"Intermediate", type:"isolation", demo:"curl", gifUrl:"", cues:["Shoulders stay back on bench.","Full stretch at bottom.","Don't swing."], steps:["Sit on incline bench with arms hanging.","Curl both dumbbells up.","Squeeze biceps.","Lower fully."], isCustom:false},
+      {name:"Cable Curl", muscle:"Biceps", equipment:"Cable machine", difficulty:"Beginner", type:"isolation", demo:"curl", gifUrl:"", cues:["Constant tension.","Elbows still.","Smooth tempo."], steps:["Stand facing low cable.","Grip straight or EZ attachment.","Curl to shoulder height.","Lower slowly."], isCustom:false},
+      {name:"Preacher Curl", muscle:"Biceps", equipment:"EZ bar / machine", difficulty:"Intermediate", type:"isolation", demo:"curl", gifUrl:"", cues:["Upper arm glued to pad.","Full control.","Avoid bouncing off the bottom."], steps:["Set upper arm on preacher pad.","Curl weight upward.","Pause and squeeze.","Lower with control."], isCustom:false},
+
+      {name:"Cable Pushdown", muscle:"Triceps", equipment:"Cable machine", difficulty:"Beginner", type:"isolation", demo:"pushdown", gifUrl:"", cues:["Pin elbows to sides.","Extend fully.","Don’t let shoulders roll forward."], steps:["Stand tall at high pulley.","Grip the rope or bar.","Press hands down until elbows lock.","Return under control."], isCustom:false},
+      {name:"Overhead Triceps Extension", muscle:"Triceps", equipment:"Dumbbell / cable", difficulty:"Beginner", type:"isolation", demo:"overhead", gifUrl:"", cues:["Keep elbows close.","Stretch at the bottom.","Brace ribs down."], steps:["Hold weight overhead.","Bend elbows to lower behind head.","Extend back to start.","Keep upper arms mostly still."], isCustom:false},
+      {name:"Skull Crusher", muscle:"Triceps", equipment:"EZ bar", difficulty:"Intermediate", type:"isolation", demo:"skull", gifUrl:"", cues:["Hinge at elbows, not shoulders.","Lower near forehead.","Press back to lockout."], steps:["Lie on bench holding EZ bar above chest.","Bend elbows to lower bar.","Stop near forehead.","Extend back up."], isCustom:false},
+      {name:"Bench Dip", muscle:"Triceps", equipment:"Bench", difficulty:"Beginner", type:"compound", demo:"dip", gifUrl:"", cues:["Shoulders down.","Bend elbows straight back.","Use a range you can control."], steps:["Place hands on edge of bench.","Slide hips forward.","Lower by bending elbows.","Press up."], isCustom:false},
+      {name:"Close-Grip Bench Press", muscle:"Triceps", equipment:"Barbell", difficulty:"Intermediate", type:"compound", demo:"press", gifUrl:"", cues:["Hands narrower than normal bench.","Elbows tuck more.","Drive evenly off the chest."], steps:["Set up like a bench press.","Grip slightly inside shoulder width.","Lower to lower chest.","Press back to lockout."], isCustom:false},
+
+      {name:"Back Squat", muscle:"Quads", equipment:"Barbell", difficulty:"Intermediate", type:"compound", demo:"squat", gifUrl:"", cues:["Brace before every rep.","Knees track over toes.","Drive up through mid-foot."], steps:["Set bar on upper traps.","Stand with feet shoulder width.","Sit down and between your hips.","Stand back up strongly."], isCustom:false},
+      {name:"Front Squat", muscle:"Quads", equipment:"Barbell", difficulty:"Advanced", type:"compound", demo:"squat", gifUrl:"", cues:["Elbows high.","Stay upright.","Push knees forward."], steps:["Rack bar on front delts.","Lift elbows high.","Squat down keeping torso tall.","Stand to full extension."], isCustom:false},
+      {name:"Leg Press", muscle:"Quads", equipment:"Machine", difficulty:"Beginner", type:"compound", demo:"legpress", gifUrl:"", cues:["Full foot on platform.","Control depth.","Drive through feet evenly."], steps:["Sit in machine and set feet shoulder width.","Unlock sled.","Lower until knees bend deeply.","Press back up without locking hard."], isCustom:false},
+      {name:"Bulgarian Split Squat", muscle:"Quads", equipment:"Bodyweight / dumbbells", difficulty:"Intermediate", type:"compound", demo:"split", gifUrl:"", cues:["Front foot planted.","Torso slightly forward.","Drop straight down."], steps:["Elevate rear foot behind you.","Step front foot forward.","Lower into split squat.","Drive back up through front leg."], isCustom:false},
+      {name:"Leg Extension", muscle:"Quads", equipment:"Machine", difficulty:"Beginner", type:"isolation", demo:"extension", gifUrl:"", cues:["Control the top.","Pause on contraction.","Lower slowly."], steps:["Sit in the machine and align knee joint.","Extend knees upward.","Squeeze quads.","Return slowly."], isCustom:false},
+
+      {name:"Hip Thrust", muscle:"Hamstrings & Glutes", equipment:"Barbell", difficulty:"Intermediate", type:"compound", demo:"thrust", gifUrl:"", cues:["Chin tucked.","Drive through heels.","Squeeze glutes at top."], steps:["Rest upper back on bench.","Place bar over hips.","Drop hips down.","Drive hips up until torso is parallel."], isCustom:false},
+      {name:"Leg Curl", muscle:"Hamstrings & Glutes", equipment:"Machine", difficulty:"Beginner", type:"isolation", demo:"curl-leg", gifUrl:"", cues:["Curl through full range.","Hips stay planted.","Lower slowly."], steps:["Set machine to your leg length.","Curl heels toward glutes.","Pause briefly.","Lower with control."], isCustom:false},
+      {name:"Good Morning", muscle:"Hamstrings & Glutes", equipment:"Barbell", difficulty:"Advanced", type:"compound", demo:"hinge", gifUrl:"", cues:["Soft knees.","Long spine.","Hinge instead of squatting."], steps:["Place bar on upper back.","Push hips back.","Lower torso until hamstrings load.","Drive hips through to stand."], isCustom:false},
+      {name:"Glute Bridge", muscle:"Hamstrings & Glutes", equipment:"Bodyweight / barbell", difficulty:"Beginner", type:"compound", demo:"thrust", gifUrl:"", cues:["Brace core.","Push through heels.","Full squeeze at top."], steps:["Lie on your back with knees bent.","Drive heels into floor.","Lift hips up.","Lower slowly."], isCustom:false},
+      {name:"Walking Lunge", muscle:"Hamstrings & Glutes", equipment:"Bodyweight / dumbbells", difficulty:"Intermediate", type:"compound", demo:"lunge", gifUrl:"", cues:["Long stride.","Stay balanced.","Push through front leg."], steps:["Step forward into a lunge.","Lower rear knee toward floor.","Drive up and step through.","Repeat on opposite side."], isCustom:false},
+
+      {name:"Standing Calf Raise", muscle:"Calves", equipment:"Machine / bodyweight", difficulty:"Beginner", type:"isolation", demo:"calf", gifUrl:"", cues:["Rise high on toes.","Pause at top.","Use full stretch at bottom."], steps:["Stand with balls of feet supported.","Drop heels for stretch.","Push up onto toes.","Lower with control."], isCustom:false},
+      {name:"Seated Calf Raise", muscle:"Calves", equipment:"Machine", difficulty:"Beginner", type:"isolation", demo:"calf", gifUrl:"", cues:["Smooth tempo.","Pause both top and bottom.","Keep knees still."], steps:["Sit with pads over thighs.","Lower heels down.","Raise heels high.","Return slowly."], isCustom:false},
+      {name:"Single-Leg Calf Raise", muscle:"Calves", equipment:"Bodyweight", difficulty:"Beginner", type:"isolation", demo:"calf", gifUrl:"", cues:["Use a wall for balance if needed.","Full range.","Stay controlled."], steps:["Stand on one foot.","Drop heel slightly.","Rise onto toes.","Repeat and switch sides."], isCustom:false},
+      {name:"Leg Press Calf Raise", muscle:"Calves", equipment:"Machine", difficulty:"Beginner", type:"isolation", demo:"calf", gifUrl:"", cues:["Only ankle joint moves.","Control each rep.","Don’t bounce."], steps:["Place balls of feet low on platform.","Unlock sled safely.","Lower heels.","Press through toes."], isCustom:false},
+      {name:"Donkey Calf Raise", muscle:"Calves", equipment:"Machine", difficulty:"Intermediate", type:"isolation", demo:"calf", gifUrl:"", cues:["Deep stretch.","Strong top contraction.","Steady rhythm."], steps:["Set hips under pad.","Bend at hips slightly.","Lower heels.","Drive onto toes."], isCustom:false},
+
+      {name:"Plank", muscle:"Core", equipment:"Bodyweight", difficulty:"Beginner", type:"isometric", demo:"plank", gifUrl:"", cues:["Squeeze glutes.","Ribs down.","Push floor away."], steps:["Set forearms on floor.","Extend legs behind you.","Keep body straight.","Hold while breathing."], isCustom:false},
+      {name:"Dead Bug", muscle:"Core", equipment:"Bodyweight", difficulty:"Beginner", type:"control", demo:"deadbug", gifUrl:"", cues:["Lower back stays down.","Move slowly.","Exhale on reach."], steps:["Lie on back with arms and knees up.","Reach opposite arm and leg away.","Return to center.","Switch sides."], isCustom:false},
+      {name:"Hanging Leg Raise", muscle:"Core", equipment:"Pull-up bar", difficulty:"Advanced", type:"compound", demo:"legraise", gifUrl:"", cues:["Avoid swinging.","Lift with abs, not momentum.","Control the lowering phase."], steps:["Hang from bar.","Brace core.","Raise legs up in front.","Lower slowly."], isCustom:false},
+      {name:"Russian Twist", muscle:"Core", equipment:"Bodyweight / plate", difficulty:"Beginner", type:"rotation", demo:"twist", gifUrl:"", cues:["Tall chest.","Rotate through torso.","Stay controlled."], steps:["Sit with heels down or lifted.","Lean back slightly.","Rotate side to side.","Keep rhythm smooth."], isCustom:false},
+      {name:"Ab Wheel Rollout", muscle:"Core", equipment:"Ab wheel", difficulty:"Advanced", type:"anti-extension", demo:"rollout", gifUrl:"", cues:["Brace hard before moving.","Only go as far as you can control.","Pull back with abs."], steps:["Kneel with wheel under shoulders.","Roll forward slowly.","Stop before lower back arches.","Pull back to start."], isCustom:false}
+    ];
+
+    const templates = {
+      push: {name:"Push Day", day:"Push", goal:"Hypertrophy", difficulty:"Intermediate", notes:"Focus on quality pressing and controlled accessory work.", exercises:["Barbell Bench Press","Incline Dumbbell Press","Dumbbell Shoulder Press","Lateral Raise","Cable Pushdown"]},
+      pull: {name:"Pull Day", day:"Pull", goal:"Hypertrophy", difficulty:"Intermediate", notes:"Drive elbows on rows and pulldowns, control the lowering phase.", exercises:["Lat Pulldown","Seated Cable Row","One-Arm Dumbbell Row","Face Pull","Barbell Curl"]},
+      legs: {name:"Leg Day", day:"Legs", goal:"Strength", difficulty:"Intermediate", notes:"Brace hard on compounds and use full range where comfortable.", exercises:["Back Squat","Romanian Deadlift","Leg Press","Hip Thrust","Standing Calf Raise"]}
+    };
+
+    const LES_MILLS = [
+      "Les Mills BodyPump",
+      "Les Mills BodyCombat",
+      "Les Mills RPM",
+      "Les Mills GRIT",
+      "Les Mills BodyBalance",
+      "Les Mills Core",
+      "Les Mills Sprint",
+      "Les Mills Shapes"
+    ];
+
+    let selectedMuscle = "All";
+    let librarySearch = "";
+    let builderWorkout = [];
+    let calendarViewDate = new Date();
+    let selectedCalendarDate = formatDateInputValue(new Date());
+    let editingCustomExerciseId = null;
+
+    function saveToStorage(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+    function loadFromStorage(key, fallback){
+      try{ return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+      catch{ return fallback; }
+    }
+
+    function getCustomExercises(){ return loadFromStorage('workout_builder_custom_exercises', []); }
+    function setCustomExercises(items){ saveToStorage('workout_builder_custom_exercises', items); }
+
+    function getAllExercises(){
+      return [...BASE_EXERCISES, ...getCustomExercises()];
+    }
+
+    function getMuscleGroups(){
+      return ["All", ...new Set(getAllExercises().map(e => e.muscle))];
+    }
+
+    function getSavedWorkouts(){ return loadFromStorage('workout_builder_saved_workouts', []); }
+    function getCalendarItems(){ return loadFromStorage('workout_builder_calendar', []); }
+
+    function switchScreen(screenId, tabButton){
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      const target = tabButton || document.querySelector(`.tab[data-screen="${screenId}"]`);
+      if(target) target.classList.add('active');
+
+      if(screenId === 'calendarScreen'){
+        renderCalendar();
+        renderSelectedDayItems();
+      }
+    }
+
+    function cryptoRandomId(){ return Math.random().toString(36).slice(2, 10); }
+
+    function makeDefaultSet(index){
+      return { setNumber:index+1, reps:10, weight:"", rest:90, tempo:"2-0-2", rpe:"8", note:"" };
+    }
+
+    function formatDateInputValue(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function prettyDate(isoDate){
+      if(!isoDate) return '';
+      const [y,m,d] = isoDate.split('-').map(Number);
+      const date = new Date(y, m-1, d);
+      return date.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+    }
+
+    function escapeHtml(str){
+      return String(str ?? '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#39;");
+    }
+
+    function updateCounts(){
+      const saved = getSavedWorkouts();
+      const calendarItems = getCalendarItems();
+      const exercises = getAllExercises();
+      document.getElementById('savedCountPill').textContent = `${saved.length} saved`;
+      document.getElementById('homeWorkoutCount').textContent = saved.length;
+      document.getElementById('homeExerciseCount').textContent = exercises.length;
+      document.getElementById('homeCalendarCount').textContent = calendarItems.length;
+    }
+
+    function fillExerciseSelects(){
+      const builderSelect = document.getElementById('builderExerciseSelect');
+      const muscleSelect = document.getElementById('customExerciseMuscle');
+
+      builderSelect.innerHTML = '';
+      muscleSelect.innerHTML = '';
+
+      const grouped = {};
+      getAllExercises().forEach(ex => {
+        if(!grouped[ex.muscle]) grouped[ex.muscle] = [];
+        grouped[ex.muscle].push(ex);
+      });
+
+      Object.keys(grouped).sort().forEach(group => {
+        const og = document.createElement('optgroup');
+        og.label = group;
+        grouped[group].sort((a,b) => a.name.localeCompare(b.name)).forEach(ex => {
+          const opt = document.createElement('option');
+          opt.value = ex.name;
+          opt.textContent = `${ex.name} • ${ex.equipment}`;
+          og.appendChild(opt);
+        });
+        builderSelect.appendChild(og);
+      });
+
+      [...new Set(getAllExercises().map(e => e.muscle))].sort().forEach(group => {
+        const opt = document.createElement('option');
+        opt.value = group;
+        opt.textContent = group;
+        muscleSelect.appendChild(opt);
+      });
+    }
+
+    function populateCalendarSelects(){
+      const savedSelect = document.getElementById('calendarWorkoutSelect');
+      const lesMillsSelect = document.getElementById('calendarLesMillsSelect');
+      const saved = getSavedWorkouts();
+
+      savedSelect.innerHTML = '';
+      lesMillsSelect.innerHTML = '';
+
+      if(!saved.length){
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'No saved workouts yet';
+        savedSelect.appendChild(opt);
+      } else {
+        saved.forEach(workout => {
+          const opt = document.createElement('option');
+          opt.value = workout.id;
+          opt.textContent = workout.name;
+          savedSelect.appendChild(opt);
+        });
+      }
+
+      LES_MILLS.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        lesMillsSelect.appendChild(opt);
+      });
+    }
+
+    function renderMuscleChips(){
+      const row = document.getElementById('muscleChips');
+      row.innerHTML = '';
+      getMuscleGroups().forEach(group => {
+        const btn = document.createElement('button');
+        btn.className = `chip ${group === selectedMuscle ? 'active' : ''}`;
+        btn.textContent = group;
+        btn.onclick = () => {
+          selectedMuscle = group;
+          renderMuscleChips();
+          renderLibrary();
+        };
+        row.appendChild(btn);
+      });
+    }
+
+    function renderExerciseDemo(ex){
+      if(ex.gifUrl){
+        return `<img class="demo-gif" src="${escapeHtml(ex.gifUrl)}" alt="${escapeHtml(ex.name)} demo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><div style="display:none;">${demoSVG(ex.demo || 'press')}</div>`;
+      }
+      return demoSVG(ex.demo || 'press');
+    }
+
+    function renderLibrary(){
+      const list = document.getElementById('exerciseList');
+      const sortMode = document.getElementById('sortSelect').value;
+
+      let items = getAllExercises().filter(ex => {
+        const matchesMuscle = selectedMuscle === 'All' || ex.muscle === selectedMuscle;
+        const matchesSearch = [ex.name, ex.muscle, ex.equipment, ex.difficulty, ex.type, ...(ex.cues || []), ...(ex.steps || [])].join(' ').toLowerCase().includes(librarySearch.toLowerCase());
+        return matchesMuscle && matchesSearch;
+      });
+
+      items.sort((a,b) => {
+        if(sortMode === 'difficulty') return a.difficulty.localeCompare(b.difficulty) || a.name.localeCompare(b.name);
+        if(sortMode === 'equipment') return a.equipment.localeCompare(b.equipment) || a.name.localeCompare(b.name);
+        return a.name.localeCompare(b.name);
+      });
+
+      list.innerHTML = '';
+
+      if(!items.length){
+        list.innerHTML = '<div class="empty">No exercises match that search yet.</div>';
+        return;
+      }
+
+      items.forEach(ex => {
+        const card = document.createElement('div');
+        card.className = 'exercise-card';
+
+        const customButtons = ex.isCustom ? `
+          <div class="btn-row" style="margin-top:10px;">
+            <button class="btn btn-small btn-secondary" onclick='editCustomExercise(${JSON.stringify(ex.id)})'>Edit</button>
+            <button class="btn btn-small btn-danger" onclick='deleteCustomExercise(${JSON.stringify(ex.id)})'>Delete</button>
+          </div>
+        ` : '';
+
+        card.innerHTML = `
+          <div class="exercise-head">
+            <div>
+              <h4>${escapeHtml(ex.name)}</h4>
+              <div class="tag-row">
+                <span class="tag">${escapeHtml(ex.muscle)}</span>
+                <span class="tag">${escapeHtml(ex.equipment)}</span>
+                <span class="tag">${escapeHtml(ex.difficulty)}</span>
+                <span class="tag">${escapeHtml(ex.type || 'custom')}</span>
+                ${ex.isCustom ? `<span class="tag accent">Custom</span>` : ''}
+              </div>
+            </div>
+            <button class="btn btn-small btn-primary" onclick='quickAddFromLibrary(${JSON.stringify(ex.name)})'>Add</button>
+          </div>
+
+          ${customButtons}
+
+          <div class="demo-box">
+            <div class="demo-stage">${renderExerciseDemo(ex)}</div>
+            <div class="demo-caption">
+              <p><strong>Coaching cues:</strong> ${(ex.cues && ex.cues.length ? ex.cues : ['No cues added yet.']).map(escapeHtml).join(' ')}</p>
+              <ol class="demo-steps">${(ex.steps && ex.steps.length ? ex.steps : ['No steps added yet.']).map(step => `<li>${escapeHtml(step)}</li>`).join('')}</ol>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function builderModeChanged(){
+      const mode = document.getElementById('builderExerciseMode').value;
+      document.getElementById('customExerciseFields').style.display = mode === 'custom' ? 'block' : 'none';
+    }
+
+    function buildExerciseObjectFromName(name, initialSets){
+      const found = getAllExercises().find(e => e.name === name);
+      const setCount = Number(initialSets) || 3;
+      return {
+        id: cryptoRandomId(),
+        name: found?.name || name,
+        muscle: found?.muscle || 'Custom',
+        equipment: found?.equipment || 'Custom',
+        difficulty: found?.difficulty || 'Beginner',
+        setType:"normal",
+        groupLabel:"",
+        notes:"",
+        collapsed:false,
+        sets: Array.from({length:setCount}, (_,i) => makeDefaultSet(i))
+      };
+    }
+
+    function addExerciseToBuilder(prefillName){
+      const mode = document.getElementById('builderExerciseMode').value;
+      const setCount = document.getElementById('builderDefaultSets').value || 3;
+
+      if(mode === 'custom'){
+        const name = document.getElementById('customExerciseName').value.trim();
+        if(!name){ alert('Add a custom exercise name first.'); return; }
+
+        builderWorkout.push({
+          id: cryptoRandomId(),
+          name,
+          muscle: document.getElementById('customExerciseMuscle').value,
+          equipment: document.getElementById('customExerciseEquipment').value.trim() || 'Custom',
+          difficulty: document.getElementById('customExerciseDifficulty').value,
+          setType:"normal",
+          groupLabel:"",
+          notes:"",
+          collapsed:false,
+          sets: Array.from({length:Number(setCount) || 3}, (_,i) => makeDefaultSet(i))
+        });
+      } else {
+        const exerciseName = prefillName || document.getElementById('builderExerciseSelect').value;
+        builderWorkout.push(buildExerciseObjectFromName(exerciseName, setCount));
+      }
+
+      renderBuilderWorkout();
+      switchScreen('builderScreen');
+    }
+
+    function quickAddFromLibrary(name){
+      builderWorkout.push(buildExerciseObjectFromName(name, 3));
+      renderBuilderWorkout();
+      switchScreen('builderScreen');
+    }
+
+    function renderBuilderWorkout(){
+      const wrap = document.getElementById('builderWorkoutList');
+      wrap.innerHTML = '';
+
+      if(!builderWorkout.length){
+        wrap.innerHTML = '<div class="empty">No exercises in this workout yet. Add one from the builder or library.</div>';
+        return;
+      }
+
+      builderWorkout.forEach((exercise, index) => {
+        const el = document.createElement('div');
+        el.className = 'builder-exercise';
+
+        const groupBadge = exercise.groupLabel
+          ? `<span class="tag accent">${exercise.setType === 'superset' ? 'Superset' : exercise.setType === 'circuit' ? 'Circuit' : 'Group'} ${escapeHtml(exercise.groupLabel)}</span>`
+          : '';
+
+        const bodyStyle = exercise.collapsed ? 'display:none;' : '';
+
+        el.innerHTML = `
+          <div class="builder-top">
+            <div class="exercise-title-wrap">
+              <button class="exercise-title-btn" onclick="toggleExerciseCollapse(${index})">
+                <span class="chev ${exercise.collapsed ? 'closed' : ''}">⌄</span>
+                <h4>${index + 1}. ${escapeHtml(exercise.name)}</h4>
+              </button>
+
+              <div class="builder-meta">
+                <span class="tag">${escapeHtml(exercise.muscle)}</span>
+                <span class="tag">${escapeHtml(exercise.equipment)}</span>
+                <span class="tag">${escapeHtml(exercise.difficulty)}</span>
+                <span class="tag warning">${escapeHtml(getSetTypeLabel(exercise.setType))}</span>
+                ${groupBadge}
+                <span class="tag">${exercise.sets.length} sets</span>
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-small btn-secondary" onclick="moveExercise(${index}, -1)">↑</button>
+              <button class="btn btn-small btn-secondary" onclick="moveExercise(${index}, 1)">↓</button>
+              <button class="btn btn-small btn-secondary" onclick="duplicateExercise(${index})">Duplicate</button>
+              <button class="btn btn-small btn-danger" onclick="removeExercise(${index})">Remove</button>
+            </div>
+          </div>
+
+          <div class="builder-body" id="exerciseBody${index}" style="${bodyStyle}">
+            <div class="builder-toolbar">
+              <div>
+                <label>Exercise type</label>
+                <select onchange="updateExerciseField(${index}, 'setType', this.value)">
+                  <option value="normal" ${exercise.setType === 'normal' ? 'selected' : ''}>Normal</option>
+                  <option value="superset" ${exercise.setType === 'superset' ? 'selected' : ''}>Superset</option>
+                  <option value="circuit" ${exercise.setType === 'circuit' ? 'selected' : ''}>Circuit</option>
+                </select>
+              </div>
+
+              <div>
+                <label>Group label</label>
+                <input type="text" maxlength="3" placeholder="A" value="${escapeHtml(exercise.groupLabel || '')}" oninput="updateExerciseField(${index}, 'groupLabel', this.value.toUpperCase().slice(0,3))" />
+              </div>
+
+              <div>
+                <label>Quick actions</label>
+                <div class="btn-row">
+                  <button class="btn btn-small btn-secondary" onclick="copyLastSet(${index})">Copy last set</button>
+                  <button class="btn btn-small btn-primary" onclick="addSet(${index})">Add set</button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label>Exercise notes</label>
+              <textarea placeholder="Optional coaching note, target reps in reserve, special tempo..." oninput="updateExerciseField(${index}, 'notes', this.value)">${escapeHtml(exercise.notes || '')}</textarea>
+            </div>
+
+            <div class="set-table">
+              ${exercise.sets.map((set, setIndex) => `
+                <div class="set-card">
+                  <div class="set-row">
+                    <div class="set-label">Set ${set.setNumber}</div>
+                    <input type="number" min="1" placeholder="Reps" value="${escapeHtml(set.reps)}" oninput="updateSet(${index}, ${setIndex}, 'reps', this.value)" />
+                    <input type="text" placeholder="Weight" value="${escapeHtml(set.weight)}" oninput="updateSet(${index}, ${setIndex}, 'weight', this.value)" />
+                    <input type="number" min="0" placeholder="Rest (sec)" value="${escapeHtml(set.rest)}" oninput="updateSet(${index}, ${setIndex}, 'rest', this.value)" />
+                    <input type="text" placeholder="Tempo" value="${escapeHtml(set.tempo)}" oninput="updateSet(${index}, ${setIndex}, 'tempo', this.value)" />
+                    <input type="text" placeholder="RPE" value="${escapeHtml(set.rpe)}" oninput="updateSet(${index}, ${setIndex}, 'rpe', this.value)" />
+                    <button class="btn btn-small btn-danger remove-set" onclick="removeSet(${index}, ${setIndex})">✕</button>
+                  </div>
+
+                  <div style="margin-top:8px;">
+                    <label>Optional set note</label>
+                    <input type="text" placeholder="Last set AMRAP / pause reps / etc." value="${escapeHtml(set.note || '')}" oninput="updateSet(${index}, ${setIndex}, 'note', this.value)" />
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        wrap.appendChild(el);
+      });
+    }
+
+    function toggleExerciseCollapse(index){
+      builderWorkout[index].collapsed = !builderWorkout[index].collapsed;
+      renderBuilderWorkout();
+    }
+
+    function getSetTypeLabel(type){
+      if(type === 'superset') return 'Superset';
+      if(type === 'circuit') return 'Circuit';
+      return 'Normal';
+    }
+
+    function updateExerciseField(index, key, value){
+      builderWorkout[index][key] = value;
+      if(key === 'setType' && value === 'normal'){
+        builderWorkout[index].groupLabel = '';
+      }
+      renderBuilderWorkout();
+    }
+
+    function updateSet(exerciseIndex, setIndex, key, value){
+      builderWorkout[exerciseIndex].sets[setIndex][key] = value;
+    }
+
+    function addSet(exerciseIndex){
+      const sets = builderWorkout[exerciseIndex].sets;
+      sets.push({ setNumber: sets.length + 1, reps:10, weight:"", rest:90, tempo:"2-0-2", rpe:"8", note:"" });
+      renderBuilderWorkout();
+    }
+
+    function copyLastSet(exerciseIndex){
+      const sets = builderWorkout[exerciseIndex].sets;
+      if(!sets.length) return addSet(exerciseIndex);
+      const last = JSON.parse(JSON.stringify(sets[sets.length - 1]));
+      last.setNumber = sets.length + 1;
+      sets.push(last);
+      renderBuilderWorkout();
+    }
+
+    function removeSet(exerciseIndex, setIndex){
+      const sets = builderWorkout[exerciseIndex].sets;
+      if(sets.length === 1){
+        alert('Each exercise should keep at least one set.');
+        return;
+      }
+      sets.splice(setIndex, 1);
+      sets.forEach((set, i) => set.setNumber = i + 1);
+      renderBuilderWorkout();
+    }
+
+    function moveExercise(index, direction){
+      const target = index + direction;
+      if(target < 0 || target >= builderWorkout.length) return;
+      [builderWorkout[index], builderWorkout[target]] = [builderWorkout[target], builderWorkout[index]];
+      renderBuilderWorkout();
+    }
+
+    function duplicateExercise(index){
+      const copy = JSON.parse(JSON.stringify(builderWorkout[index]));
+      copy.id = cryptoRandomId();
+      copy.collapsed = false;
+      builderWorkout.splice(index + 1, 0, copy);
+      renderBuilderWorkout();
+    }
+
+    function removeExercise(index){
+      builderWorkout.splice(index, 1);
+      renderBuilderWorkout();
+    }
+
+    function clearBuilder(){
+      if(!builderWorkout.length) return;
+      if(confirm('Clear the current builder?')){
+        builderWorkout = [];
+        renderBuilderWorkout();
+      }
+    }
+
+    function saveWorkout(){
+      const name = document.getElementById('workoutName').value.trim();
+      const day = document.getElementById('workoutDay').value.trim();
+      const goal = document.getElementById('workoutGoal').value;
+      const difficulty = document.getElementById('workoutDifficulty').value;
+      const notes = document.getElementById('workoutNotes').value.trim();
+
+      if(!name){ alert('Give your workout a name first.'); return; }
+      if(!builderWorkout.length){ alert('Add at least one exercise before saving.'); return; }
+
+      const saved = getSavedWorkouts();
+      saved.unshift({
+        id: cryptoRandomId(),
+        name,
+        day,
+        goal,
+        difficulty,
+        notes,
+        createdAt: new Date().toLocaleString(),
+        exercises: JSON.parse(JSON.stringify(builderWorkout))
+      });
+
+      saveToStorage('workout_builder_saved_workouts', saved);
+      renderSavedWorkouts();
+      populateCalendarSelects();
+      updateCounts();
+      switchScreen('workoutsScreen');
+      resetBuilderForm();
+    }
+
+    function renderSavedWorkouts(){
+      const wrap = document.getElementById('savedWorkouts');
+      const saved = getSavedWorkouts();
+      wrap.innerHTML = '';
+
+      if(!saved.length){
+        wrap.innerHTML = '<div class="empty">No saved workouts yet. Build one and save it here.</div>';
+        return;
+      }
+
+      saved.forEach((workout, index) => {
+        const card = document.createElement('div');
+        card.className = 'workout-card';
+        card.innerHTML = `
+          <div>
+            <div class="exercise-head">
+              <div>
+                <h4 style="margin:0; font-size:1.12rem;">${escapeHtml(workout.name)}</h4>
+                <p class="sub" style="margin:6px 0 0;">Saved ${escapeHtml(workout.createdAt)}</p>
+              </div>
+              <button class="btn btn-small btn-danger" onclick="deleteWorkout(${index})">Delete</button>
+            </div>
+
+            <div class="workout-meta">
+              ${workout.day ? `<span class="tag">${escapeHtml(workout.day)}</span>` : ''}
+              <span class="tag">${escapeHtml(workout.goal)}</span>
+              <span class="tag">${escapeHtml(workout.difficulty)}</span>
+              <span class="tag">${workout.exercises.length} exercises</span>
+            </div>
+
+            ${workout.notes ? `<p class="muted" style="margin:10px 0 0;">${escapeHtml(workout.notes)}</p>` : ''}
+          </div>
+
+          <div class="grid">
+            ${workout.exercises.map(ex => `
+              <div class="exercise-mini">
+                <strong>${escapeHtml(ex.name)}</strong>
+                <span>${escapeHtml(ex.muscle)} • ${escapeHtml(getSetTypeLabel(ex.setType || 'normal'))}${ex.groupLabel ? ` ${escapeHtml(ex.groupLabel)}` : ''}</span>
+                <span>${ex.sets.map(set => `${escapeHtml(set.reps)} reps${set.weight ? ` @ ${escapeHtml(set.weight)}` : ''}`).join(' · ')}</span>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-small btn-secondary" onclick="loadWorkoutIntoBuilder(${index})">Edit in builder</button>
+          </div>
+        `;
+        wrap.appendChild(card);
+      });
+    }
+
+    function deleteWorkout(index){
+      const saved = getSavedWorkouts();
+      if(!confirm(`Delete "${saved[index].name}"?`)) return;
+      saved.splice(index, 1);
+      saveToStorage('workout_builder_saved_workouts', saved);
+      renderSavedWorkouts();
+      populateCalendarSelects();
+      updateCounts();
+      renderCalendar();
+      renderSelectedDayItems();
+    }
+
+    function loadWorkoutIntoBuilder(index){
+      const saved = getSavedWorkouts();
+      const workout = saved[index];
+      if(!workout) return;
+
+      document.getElementById('workoutName').value = workout.name || '';
+      document.getElementById('workoutDay').value = workout.day || '';
+      document.getElementById('workoutGoal').value = workout.goal || 'Hypertrophy';
+      document.getElementById('workoutDifficulty').value = workout.difficulty || 'Beginner';
+      document.getElementById('workoutNotes').value = workout.notes || '';
+
+      builderWorkout = JSON.parse(JSON.stringify(workout.exercises || [])).map(ex => ({
+        ...ex,
+        collapsed:false,
+        setType: ex.setType || 'normal',
+        groupLabel: ex.groupLabel || ''
+      }));
+
+      renderBuilderWorkout();
+      switchScreen('builderScreen');
+    }
+
+    function resetBuilderForm(){
+      document.getElementById('workoutName').value = '';
+      document.getElementById('workoutDay').value = '';
+      document.getElementById('workoutGoal').value = 'Hypertrophy';
+      document.getElementById('workoutDifficulty').value = 'Beginner';
+      document.getElementById('workoutNotes').value = '';
+      document.getElementById('builderDefaultSets').value = 3;
+      document.getElementById('builderExerciseMode').value = 'library';
+      document.getElementById('customExerciseName').value = '';
+      document.getElementById('customExerciseEquipment').value = '';
+      document.getElementById('customExerciseDifficulty').value = 'Beginner';
+      builderWorkout = [];
+      builderModeChanged();
+      renderBuilderWorkout();
+    }
+
+    function loadTemplate(key){
+      const tpl = templates[key];
+      if(!tpl) return;
+      document.getElementById('workoutName').value = tpl.name;
+      document.getElementById('workoutDay').value = tpl.day;
+      document.getElementById('workoutGoal').value = tpl.goal;
+      document.getElementById('workoutDifficulty').value = tpl.difficulty;
+      document.getElementById('workoutNotes').value = tpl.notes;
+      builderWorkout = tpl.exercises.map(name => buildExerciseObjectFromName(name, 3));
+      renderBuilderWorkout();
+      switchScreen('builderScreen');
+    }
+
+    function updateCalendarPickerVisibility(){
+      const type = document.getElementById('calendarItemType').value;
+      document.getElementById('savedWorkoutPickerWrap').style.display = type === 'saved' ? 'block' : 'none';
+      document.getElementById('lesMillsPickerWrap').style.display = type === 'lesmills' ? 'block' : 'none';
+    }
+
+    function scheduleSelectedItem(){
+      const date = document.getElementById('selectedCalendarDate').value;
+      const itemType = document.getElementById('calendarItemType').value;
+
+      if(!date){
+        alert('Pick a date first.');
+        return;
+      }
+
+      const calendarItems = getCalendarItems();
+
+      if(itemType === 'saved'){
+        const workoutId = document.getElementById('calendarWorkoutSelect').value;
+        const saved = getSavedWorkouts();
+        const workout = saved.find(w => w.id === workoutId);
+        if(!workout){
+          alert('Save a workout first, then add it to the calendar.');
+          return;
+        }
+
+        calendarItems.push({
+          id: cryptoRandomId(),
+          date,
+          type:'saved',
+          label: workout.name,
+          refId: workout.id
+        });
+      } else {
+        const className = document.getElementById('calendarLesMillsSelect').value;
+        if(!className){
+          alert('Choose a Les Mills class.');
+          return;
+        }
+        calendarItems.push({
+          id: cryptoRandomId(),
+          date,
+          type:'lesmills',
+          label: className
+        });
+      }
+
+      saveToStorage('workout_builder_calendar', calendarItems);
+      updateCounts();
+      renderCalendar();
+      renderSelectedDayItems();
+    }
+
+    function removeCalendarItem(id){
+      const items = getCalendarItems().filter(item => item.id !== id);
+      saveToStorage('workout_builder_calendar', items);
+      updateCounts();
+      renderCalendar();
+      renderSelectedDayItems();
+    }
+
+    function changeCalendarMonth(offset){
+      calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() + offset, 1);
+      renderCalendar();
+    }
+
+    function goToTodayMonth(){
+      calendarViewDate = new Date();
+      selectedCalendarDate = formatDateInputValue(new Date());
+      document.getElementById('selectedCalendarDate').value = selectedCalendarDate;
+      renderCalendar();
+      renderSelectedDayItems();
+    }
+
+    function pickCalendarDate(isoDate){
+      selectedCalendarDate = isoDate;
+      document.getElementById('selectedCalendarDate').value = isoDate;
+      renderCalendar();
+      renderSelectedDayItems();
+    }
+
+    function renderSelectedDayItems(){
+      const wrap = document.getElementById('selectedDayItems');
+      const items = getCalendarItems()
+        .filter(item => item.date === selectedCalendarDate)
+        .sort((a,b) => a.label.localeCompare(b.label));
+
+      wrap.innerHTML = '';
+
+      if(!selectedCalendarDate){
+        wrap.innerHTML = '<div class="empty">Pick a date to see what is scheduled.</div>';
+        return;
+      }
+
+      if(!items.length){
+        wrap.innerHTML = `<div class="empty">Nothing scheduled for ${escapeHtml(prettyDate(selectedCalendarDate))} yet.</div>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'scheduled-item';
+        div.innerHTML = `
+          <div class="workout-meta">
+            <span class="tag ${item.type === 'saved' ? 'accent' : ''}">${item.type === 'saved' ? 'Saved workout' : 'Les Mills'}</span>
+            <span class="tag">${escapeHtml(prettyDate(item.date))}</span>
+          </div>
+          <strong>${escapeHtml(item.label)}</strong>
+          <div class="btn-row">
+            <button class="btn btn-small btn-danger" onclick="removeCalendarItem('${item.id}')">Remove</button>
+          </div>
+        `;
+        wrap.appendChild(div);
+      });
+    }
+
+    function renderCalendar(){
+      const monthLabel = document.getElementById('calendarMonthLabel');
+      const grid = document.getElementById('calendarGrid');
+      const current = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth(), 1);
+
+      monthLabel.textContent = current.toLocaleDateString(undefined, { month:'long', year:'numeric' });
+      grid.innerHTML = '';
+
+      const firstDayIndex = current.getDay();
+      const startDate = new Date(current);
+      startDate.setDate(1 - firstDayIndex);
+
+      const items = getCalendarItems();
+      const itemsByDate = items.reduce((acc, item) => {
+        if(!acc[item.date]) acc[item.date] = [];
+        acc[item.date].push(item);
+        return acc;
+      }, {});
+
+      const todayIso = formatDateInputValue(new Date());
+
+      for(let i = 0; i < 42; i++){
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        const iso = formatDateInputValue(date);
+        const dayItems = itemsByDate[iso] || [];
+
+        const cell = document.createElement('button');
+        cell.className = 'day-cell';
+        cell.type = 'button';
+
+        if(date.getMonth() !== current.getMonth()) cell.classList.add('other-month');
+        if(iso === selectedCalendarDate) cell.classList.add('selected');
+        if(iso === todayIso) cell.classList.add('today');
+
+        const pills = dayItems.slice(0,2).map(item => {
+          const cls = item.type === 'saved' ? 'saved' : 'lesmills';
+          return `<div class="event-pill ${cls}" title="${escapeHtml(item.label)}">${escapeHtml(item.label)}</div>`;
+        }).join('');
+
+        const moreCount = dayItems.length > 2 ? `<div class="event-pill more">+${dayItems.length - 2} more</div>` : '';
+
+        cell.innerHTML = `
+          <div class="day-number">${date.getDate()}</div>
+          <div class="day-events">${pills}${moreCount}</div>
+          <div class="tiny">${dayItems.length ? `${dayItems.length} item${dayItems.length === 1 ? '' : 's'}` : ''}</div>
+        `;
+
+        cell.onclick = () => pickCalendarDate(iso);
+        grid.appendChild(cell);
+      }
+    }
+
+    function resetExerciseModal(){
+      editingCustomExerciseId = null;
+      document.getElementById('exerciseModalTitle').textContent = 'Add custom exercise';
+      document.getElementById('libExerciseName').value = '';
+      document.getElementById('libExerciseMuscle').value = '';
+      document.getElementById('libExerciseEquipment').value = '';
+      document.getElementById('libExerciseDifficulty').value = 'Beginner';
+      document.getElementById('libExerciseGif').value = '';
+      document.getElementById('libExerciseCues').value = '';
+      document.getElementById('libExerciseSteps').value = '';
+    }
+
+    function openExerciseModal(){
+      resetExerciseModal();
+      document.getElementById('exerciseModalBackdrop').classList.add('open');
+    }
+
+    function closeExerciseModal(){
+      document.getElementById('exerciseModalBackdrop').classList.remove('open');
+    }
+
+    function saveLibraryExercise(){
+      const name = document.getElementById('libExerciseName').value.trim();
+      const muscle = document.getElementById('libExerciseMuscle').value.trim();
+      const equipment = document.getElementById('libExerciseEquipment').value.trim();
+      const difficulty = document.getElementById('libExerciseDifficulty').value;
+      const gifUrl = document.getElementById('libExerciseGif').value.trim();
+      const cues = document.getElementById('libExerciseCues').value.split('\n').map(s => s.trim()).filter(Boolean);
+      const steps = document.getElementById('libExerciseSteps').value.split('\n').map(s => s.trim()).filter(Boolean);
+
+      if(!name){
+        alert('Add an exercise name first.');
+        return;
+      }
+
+      const customExercises = getCustomExercises();
+
+      if(editingCustomExerciseId){
+        const idx = customExercises.findIndex(ex => ex.id === editingCustomExerciseId);
+        if(idx === -1) return;
+        customExercises[idx] = {
+          ...customExercises[idx],
+          name,
+          muscle: muscle || 'Custom',
+          equipment: equipment || 'Custom',
+          difficulty,
+          gifUrl,
+          cues,
+          steps
+        };
+      } else {
+        const duplicate = getAllExercises().find(ex => ex.name.toLowerCase() === name.toLowerCase());
+        if(duplicate){
+          alert('An exercise with that name already exists.');
+          return;
+        }
+
+        customExercises.unshift({
+          id: cryptoRandomId(),
+          name,
+          muscle: muscle || 'Custom',
+          equipment: equipment || 'Custom',
+          difficulty,
+          type:'custom',
+          demo:'press',
+          gifUrl,
+          cues,
+          steps,
+          isCustom:true
+        });
+      }
+
+      setCustomExercises(customExercises);
+      closeExerciseModal();
+      fillExerciseSelects();
+      renderMuscleChips();
+      renderLibrary();
+      updateCounts();
+    }
+
+    function editCustomExercise(id){
+      const ex = getCustomExercises().find(item => item.id === id);
+      if(!ex) return;
+
+      editingCustomExerciseId = id;
+      document.getElementById('exerciseModalTitle').textContent = 'Edit custom exercise';
+      document.getElementById('libExerciseName').value = ex.name || '';
+      document.getElementById('libExerciseMuscle').value = ex.muscle || '';
+      document.getElementById('libExerciseEquipment').value = ex.equipment || '';
+      document.getElementById('libExerciseDifficulty').value = ex.difficulty || 'Beginner';
+      document.getElementById('libExerciseGif').value = ex.gifUrl || '';
+      document.getElementById('libExerciseCues').value = (ex.cues || []).join('\n');
+      document.getElementById('libExerciseSteps').value = (ex.steps || []).join('\n');
+      document.getElementById('exerciseModalBackdrop').classList.add('open');
+    }
+
+    function deleteCustomExercise(id){
+      const customExercises = getCustomExercises();
+      const item = customExercises.find(ex => ex.id === id);
+      if(!item) return;
+      if(!confirm(`Delete "${item.name}" from the library?`)) return;
+
+      setCustomExercises(customExercises.filter(ex => ex.id !== id));
+      fillExerciseSelects();
+      renderMuscleChips();
+      renderLibrary();
+      updateCounts();
+    }
+
+    function demoSVG(type){
+      const shared = `
+        <defs>
+          <linearGradient id="glow" x1="0" x2="1">
+            <stop offset="0%" stop-color="#7c5cff"/>
+            <stop offset="100%" stop-color="#2dd4bf"/>
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="26" r="10" fill="url(#glow)" opacity=".95"/>
+        <line x1="50" y1="36" x2="50" y2="72" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <line x1="50" y1="49" x2="30" y2="63" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <line x1="50" y1="49" x2="70" y2="63" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <line x1="50" y1="72" x2="36" y2="102" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <line x1="50" y1="72" x2="64" y2="102" stroke="white" stroke-width="7" stroke-linecap="round"/>
+      `;
+      const barTop = `<line x1="20" y1="16" x2="80" y2="16" stroke="url(#glow)" stroke-width="6" stroke-linecap="round"/>`;
+      const floor = `<line x1="8" y1="110" x2="92" y2="110" stroke="rgba(255,255,255,.15)" stroke-width="2" stroke-linecap="round"/>`;
+
+      switch(type){
+        case 'press':
+          return `<svg viewBox="0 0 100 120">${shared}${barTop}<animateTransform attributeName="transform" type="translate" values="0 0; 0 -8; 0 0" dur="1.8s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'pushup':
+          return `<svg viewBox="0 0 100 120"><defs><linearGradient id="glow2" x1="0" x2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>${floor}<circle cx="70" cy="44" r="8" fill="url(#glow2)"><animate attributeName="cy" values="44;54;44" dur="1.8s" repeatCount="indefinite"/></circle><line x1="63" y1="48" x2="40" y2="64" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="y2" values="64;76;64" dur="1.8s" repeatCount="indefinite"/></line><line x1="40" y1="64" x2="20" y2="76" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="y1" values="64;76;64" dur="1.8s" repeatCount="indefinite"/><animate attributeName="y2" values="76;92;76" dur="1.8s" repeatCount="indefinite"/></line><line x1="50" y1="58" x2="36" y2="92" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="y2" values="92;102;92" dur="1.8s" repeatCount="indefinite"/></line><line x1="50" y1="58" x2="64" y2="92" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="y2" values="92;102;92" dur="1.8s" repeatCount="indefinite"/></line></svg>`;
+        case 'row':
+          return `<svg viewBox="0 0 100 120">${shared}<line x1="16" y1="56" x2="34" y2="62" stroke="url(#glow)" stroke-width="5" stroke-linecap="round"/><line x1="66" y1="62" x2="84" y2="56" stroke="url(#glow)" stroke-width="5" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="0 0; 0 2; 0 0" dur="1.6s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'pulldown':
+          return `<svg viewBox="0 0 100 120">${shared}<line x1="18" y1="16" x2="82" y2="16" stroke="url(#glow)" stroke-width="6" stroke-linecap="round"/><line x1="30" y1="16" x2="38" y2="28" stroke="url(#glow)" stroke-width="4" stroke-linecap="round"/><line x1="70" y1="16" x2="62" y2="28" stroke="url(#glow)" stroke-width="4" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="0 0; 0 6; 0 0" dur="1.8s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'pullup':
+          return `<svg viewBox="0 0 100 120">${shared}<line x1="18" y1="14" x2="82" y2="14" stroke="url(#glow)" stroke-width="6" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="0 10; 0 0; 0 10" dur="1.8s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'hinge':
+          return `<svg viewBox="0 0 100 120"><defs><linearGradient id="glow3" x1="0" x2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>${floor}<circle cx="60" cy="28" r="10" fill="url(#glow3)"><animate attributeName="cx" values="60;66;60" dur="1.7s" repeatCount="indefinite"/><animate attributeName="cy" values="28;36;28" dur="1.7s" repeatCount="indefinite"/></circle><line x1="60" y1="38" x2="50" y2="72" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x1" values="60;66;60" dur="1.7s" repeatCount="indefinite"/><animate attributeName="y1" values="38;46;38" dur="1.7s" repeatCount="indefinite"/></line><line x1="50" y1="50" x2="28" y2="60" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/><animate attributeName="y1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/></line><line x1="50" y1="50" x2="68" y2="66" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/><animate attributeName="y1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/></line><line x1="50" y1="72" x2="38" y2="103" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/></line><line x1="50" y1="72" x2="63" y2="102" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/></line></svg>`;
+        case 'lateral':
+          return `<svg viewBox="0 0 100 120">${shared}<animateTransform attributeName="transform" type="rotate" values="0 50 50; -12 50 50; 0 50 50; 12 50 50; 0 50 50" dur="2s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'squat':
+          return `<svg viewBox="0 0 100 120">${shared}${barTop}<animateTransform attributeName="transform" type="translate" values="0 0; 0 12; 0 0" dur="1.9s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'legpress':
+          return `<svg viewBox="0 0 100 120"><defs><linearGradient id="glow4" x1="0" x2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>${floor}<line x1="20" y1="26" x2="82" y2="80" stroke="rgba(255,255,255,.18)" stroke-width="4"/><rect x="56" y="58" width="18" height="18" rx="4" fill="url(#glow4)"><animate attributeName="x" values="56;46;56" dur="1.9s" repeatCount="indefinite"/></rect><circle cx="28" cy="48" r="8" fill="url(#glow4)"/><line x1="34" y1="52" x2="48" y2="66" stroke="white" stroke-width="6" stroke-linecap="round"/><line x1="48" y1="66" x2="62" y2="66" stroke="white" stroke-width="6" stroke-linecap="round"/><line x1="48" y1="66" x2="40" y2="86" stroke="white" stroke-width="6" stroke-linecap="round"/><line x1="62" y1="66" x2="72" y2="74" stroke="white" stroke-width="6" stroke-linecap="round"><animate attributeName="x2" values="72;62;72" dur="1.9s" repeatCount="indefinite"/></line></svg>`;
+        case 'split':
+        case 'lunge':
+          return `<svg viewBox="0 0 100 120">${shared}<line x1="50" y1="72" x2="30" y2="102" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="50" y1="72" x2="70" y2="96" stroke="white" stroke-width="7" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="0 0; 0 8; 0 0" dur="1.9s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'calf':
+          return `<svg viewBox="0 0 100 120">${shared}<animateTransform attributeName="transform" type="translate" values="0 8; 0 0; 0 8" dur="1.4s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'plank':
+          return `<svg viewBox="0 0 100 120"><defs><linearGradient id="glow5" x1="0" x2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>${floor}<circle cx="74" cy="48" r="8" fill="url(#glow5)"/><line x1="66" y1="52" x2="42" y2="58" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="42" y1="58" x2="20" y2="88" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="52" y1="55" x2="62" y2="88" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="42" y1="58" x2="24" y2="60" stroke="white" stroke-width="7" stroke-linecap="round"/></svg>`;
+        case 'deadbug':
+          return `<svg viewBox="0 0 100 120"><defs><linearGradient id="glow6" x1="0" x2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>${floor}<circle cx="50" cy="84" r="8" fill="url(#glow6)"/><line x1="50" y1="76" x2="50" y2="52" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="50" y1="64" x2="28" y2="48" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x2" values="28;18;28" dur="1.8s" repeatCount="indefinite"/><animate attributeName="y2" values="48;42;48" dur="1.8s" repeatCount="indefinite"/></line><line x1="50" y1="64" x2="72" y2="48" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="50" y1="52" x2="30" y2="26" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="50" y1="52" x2="70" y2="26" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x2" values="70;80;70" dur="1.8s" repeatCount="indefinite"/><animate attributeName="y2" values="26;20;26" dur="1.8s" repeatCount="indefinite"/></line></svg>`;
+        default:
+          return `<svg viewBox="0 0 100 120">${shared}${floor}</svg>`;
+      }
+    }
+
+    function boot(){
+      fillExerciseSelects();
+      populateCalendarSelects();
+      renderMuscleChips();
+      renderLibrary();
+      renderBuilderWorkout();
+      renderSavedWorkouts();
+      updateCounts();
+
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        librarySearch = e.target.value;
+        renderLibrary();
+      });
+
+      document.getElementById('sortSelect').addEventListener('change', renderLibrary);
+      document.getElementById('builderExerciseMode').addEventListener('change', builderModeChanged);
+      document.getElementById('calendarItemType').addEventListener('change', updateCalendarPickerVisibility);
+      document.getElementById('selectedCalendarDate').addEventListener('change', (e) => {
+        selectedCalendarDate = e.target.value;
+        renderCalendar();
+        renderSelectedDayItems();
+      });
+
+      document.getElementById('exerciseModalBackdrop').addEventListener('click', (e) => {
+        if(e.target.id === 'exerciseModalBackdrop') closeExerciseModal();
+      });
+
+      document.getElementById('selectedCalendarDate').value = selectedCalendarDate;
+      updateCalendarPickerVisibility();
+      renderCalendar();
+      renderSelectedDayItems();
+    }
+
+    boot();
+  </script>
+</body>
+</html>
