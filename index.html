@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Forge Fitness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1020;
+      --bg2:#121933;
+      --card:rgba(255,255,255,.08);
+      --text:#f6f8ff;
+      --muted:#aab4d6;
+      --line:rgba(255,255,255,.10);
+      --primary:#7c5cff;
+      --primary-2:#2dd4bf;
+      --danger:#ff6b81;
+      --success:#2dd4bf;
+      --shadow:0 12px 40px rgba(0,0,0,.32);
+      --radius:24px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background:
+      radial-gradient(1200px 600px at 0% -10%, rgba(124,92,255,.28), transparent 55%),
+      radial-gradient(900px 600px at 100% 0%, rgba(45,212,191,.16), transparent 45%),
+      linear-gradient(180deg, #0a0f1f 0%, #10172e 100%);
+      color:var(--text);
+      font-family:'Inter',system-ui,sans-serif;
+      min-height:100%;
+    }
+    body{padding-bottom:calc(82px + var(--safe-bottom))}
+    .app-shell{max-width:920px;margin:0 auto;padding:18px 16px 0}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 2px 18px}
+    .brand h1{margin:0;font-size:1.75rem;letter-spacing:-.04em;font-weight:800}
+    .brand p{margin:6px 0 0;color:var(--muted);font-size:.96rem}
+    .pill{
+      border:1px solid var(--line);background:rgba(255,255,255,.06);border-radius:999px;
+      padding:10px 14px;color:var(--text);font-weight:600;backdrop-filter:blur(14px);box-shadow:var(--shadow);white-space:nowrap
+    }
+    .screen{display:none;animation:fade .18s ease}
+    .screen.active{display:block}
+    @keyframes fade{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}
+    .hero{
+      background:linear-gradient(135deg, rgba(124,92,255,.26), rgba(45,212,191,.14));
+      border:1px solid var(--line);border-radius:28px;padding:22px;box-shadow:var(--shadow);
+      backdrop-filter:blur(16px);position:relative;overflow:hidden;margin-bottom:16px
+    }
+    .hero::after{
+      content:"";position:absolute;inset:auto -60px -60px auto;width:180px;height:180px;border-radius:50%;
+      background:radial-gradient(circle, rgba(255,255,255,.18), transparent 62%);pointer-events:none
+    }
+    .hero h2{margin:0;font-size:1.45rem;line-height:1.06;letter-spacing:-.03em}
+    .hero p{margin:10px 0 0;color:#d7ddf4;max-width:44ch}
+    .grid{display:grid;gap:14px}
+    .grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+    @media (max-width:700px){.grid.two{grid-template-columns:1fr}}
+    .card{
+      background:var(--card);border:1px solid var(--line);border-radius:24px;padding:16px;
+      backdrop-filter:blur(16px);box-shadow:var(--shadow)
+    }
+    .card h3{margin:0 0 6px;font-size:1.05rem;letter-spacing:-.02em}
+    .sub{color:var(--muted);font-size:.92rem;margin:0 0 14px}
+    .stat{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;border-radius:20px;
+      background:rgba(255,255,255,.05);border:1px solid var(--line)
+    }
+    .stat strong{font-size:1.55rem;letter-spacing:-.04em;display:block}
+    .stat span{color:var(--muted);font-size:.92rem}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      border:none;border-radius:16px;padding:14px 16px;font-weight:700;font-size:.98rem;cursor:pointer;
+      transition:transform .14s ease, opacity .14s ease, background .14s ease
+    }
+    .btn:active{transform:translateY(1px) scale(.995)}
+    .btn-primary{background:linear-gradient(135deg, var(--primary), #9d7cff);color:white;box-shadow:0 10px 24px rgba(124,92,255,.35)}
+    .btn-secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--line)}
+    .btn-success{background:linear-gradient(135deg, #1fbdab, #2dd4bf);color:#07241f}
+    .btn-danger{background:rgba(255,107,129,.18);color:#ffd9df;border:1px solid rgba(255,107,129,.3)}
+    .btn-small{padding:10px 12px;border-radius:14px;font-size:.86rem;font-weight:700}
+    .section-title{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:8px 0 10px}
+    .section-title h2{margin:0;font-size:1.2rem;letter-spacing:-.03em}
+    .section-title p{margin:0;color:var(--muted);font-size:.92rem}
+    .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .field-grid.three{grid-template-columns:1.1fr .8fr .8fr}
+    @media (max-width:700px){.field-grid,.field-grid.three{grid-template-columns:1fr}}
+    label{display:block;font-size:.85rem;color:#d7ddf4;margin-bottom:8px;font-weight:600}
+    input,select,textarea{
+      width:100%;border:none;background:rgba(255,255,255,.06);border:1px solid var(--line);
+      border-radius:16px;color:var(--text);padding:14px 14px;font:inherit;outline:none
+    }
+    textarea{min-height:92px;resize:vertical}
+    input::placeholder,textarea::placeholder{color:#8e99be}
+    .chip-row{display:flex;gap:8px;overflow:auto;padding-bottom:2px;scrollbar-width:none}
+    .chip-row::-webkit-scrollbar{display:none}
+    .chip{
+      white-space:nowrap;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.06);
+      color:var(--text);padding:10px 14px;font-weight:700;cursor:pointer
+    }
+    .chip.active{background:linear-gradient(135deg, rgba(124,92,255,.34), rgba(45,212,191,.18));border-color:rgba(255,255,255,.18)}
+    .library-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    @media (max-width:700px){.library-toolbar{grid-template-columns:1fr}}
+    .exercise-list{display:grid;gap:12px}
+    .exercise-card{
+      padding:14px;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      border:1px solid var(--line);box-shadow:var(--shadow)
+    }
+    .exercise-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .exercise-head h4{margin:0;font-size:1.05rem;letter-spacing:-.02em}
+    .tag-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+    .tag{
+      font-size:.75rem;font-weight:700;color:#d7ddf4;padding:8px 10px;border-radius:999px;
+      background:rgba(255,255,255,.06);border:1px solid var(--line)
+    }
+    .demo-box{
+      margin-top:12px;border-radius:20px;background:linear-gradient(135deg, rgba(124,92,255,.16), rgba(45,212,191,.08));
+      border:1px solid var(--line);padding:12px
+    }
+    .demo-stage{
+      height:180px;width:100%;border-radius:16px;position:relative;overflow:hidden;
+      background:radial-gradient(circle at 30% 10%, rgba(255,255,255,.12), transparent 38%), linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.14));
+      border:1px solid rgba(255,255,255,.06)
+    }
+    .demo-stage svg{width:100%;height:100%;display:block}
+    .demo-caption{display:grid;gap:8px;margin-top:10px}
+    .demo-caption p{margin:0;color:#dce3ff;font-size:.92rem}
+    .demo-steps{margin:0;padding-left:18px;color:#dce3ff;font-size:.9rem}
+    .builder-exercise{
+      padding:14px;border-radius:22px;background:rgba(255,255,255,.06);border:1px solid var(--line);margin-top:12px
+    }
+    .builder-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+    .builder-top h4{margin:0;font-size:1rem}
+    .builder-top p{margin:6px 0 0;color:var(--muted);font-size:.87rem}
+    .set-table{display:grid;gap:8px}
+    .set-row{display:grid;grid-template-columns:58px 1fr 1fr 1fr 1fr auto;gap:8px;align-items:center}
+    @media (max-width:760px){
+      .set-row{grid-template-columns:repeat(2,1fr)}
+      .set-row .set-label{grid-column:1/-1}
+      .set-row .remove-set{grid-column:1/-1;width:100%}
+    }
+    .set-label{
+      color:#d7ddf4;font-weight:800;text-align:center;background:rgba(255,255,255,.05);
+      border:1px solid var(--line);border-radius:14px;padding:12px 8px
+    }
+    .muted{color:var(--muted);font-size:.9rem}
+    .empty{
+      text-align:center;color:var(--muted);padding:30px 16px;border:1px dashed rgba(255,255,255,.18);
+      border-radius:20px;background:rgba(255,255,255,.03)
+    }
+    .workout-card{
+      padding:16px;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      border:1px solid var(--line);display:grid;gap:12px
+    }
+    .workout-meta{display:flex;gap:8px;flex-wrap:wrap}
+    .exercise-mini{
+      padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);display:grid;gap:6px
+    }
+    .exercise-mini strong{font-size:.95rem}
+    .exercise-mini span{color:var(--muted);font-size:.85rem}
+    .tabbar{
+      position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(10px + var(--safe-bottom));
+      background:linear-gradient(180deg, rgba(7,10,18,.1), rgba(7,10,18,.92) 22%, rgba(7,10,18,.96));backdrop-filter:blur(16px);z-index:20
+    }
+    .tabs{
+      max-width:920px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+      background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:24px;padding:8px;box-shadow:var(--shadow)
+    }
+    .tab{
+      border:none;background:transparent;color:#9ba7ca;border-radius:18px;padding:12px 8px;cursor:pointer;
+      display:grid;gap:4px;justify-items:center;font-weight:700;font-size:.76rem
+    }
+    .tab .icon{font-size:1.1rem;line-height:1}
+    .tab.active{
+      color:white;background:linear-gradient(135deg, rgba(124,92,255,.32), rgba(45,212,191,.18));
+      border:1px solid rgba(255,255,255,.1)
+    }
+    .footer-space{height:8px}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Forge Fitness</h1>
+        <p>Build better workouts, save them, and keep your library organized.</p>
+      </div>
+      <div class="pill" id="savedCountPill">0 saved</div>
+    </div>
+
+    <section id="homeScreen" class="screen active">
+      <div class="hero">
+        <h2>Your personal workout builder, rebuilt from scratch.</h2>
+        <p>Use the exercise library, preview movement demos, and build fully customizable sessions with sets, reps, weight, rest, tempo, and RPE.</p>
+      </div>
+
+      <div class="grid two">
+        <div class="card">
+          <h3>Quick start</h3>
+          <p class="sub">Choose a direction and start building.</p>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="switchScreen('builderScreen')">Create workout</button>
+            <button class="btn btn-secondary" onclick="switchScreen('libraryScreen')">Browse library</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Stats</h3>
+          <p class="sub">A fast snapshot of what you have saved.</p>
+          <div class="grid">
+            <div class="stat"><div><strong id="homeWorkoutCount">0</strong><span>Saved workouts</span></div><div>🏋️</div></div>
+            <div class="stat"><div><strong id="homeExerciseCount">0</strong><span>Library exercises</span></div><div>📚</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <h2>Starter templates</h2>
+        <p>Load one and customize it.</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>Push Day</h3>
+          <p class="sub">Chest, shoulders, triceps with solid compounds first.</p>
+          <button class="btn btn-small btn-primary" onclick="loadTemplate('push')">Load template</button>
+        </div>
+        <div class="card">
+          <h3>Pull Day</h3>
+          <p class="sub">Back and biceps with room for accessories.</p>
+          <button class="btn btn-small btn-primary" onclick="loadTemplate('pull')">Load template</button>
+        </div>
+        <div class="card">
+          <h3>Leg Day</h3>
+          <p class="sub">Quads, hamstrings, glutes, calves, and core.</p>
+          <button class="btn btn-small btn-primary" onclick="loadTemplate('legs')">Load template</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="libraryScreen" class="screen">
+      <div class="section-title">
+        <h2>Exercise library</h2>
+        <p>Organized by muscle group with built-in demo panels.</p>
+      </div>
+      <div class="library-toolbar">
+        <input id="searchInput" type="text" placeholder="Search exercises..." />
+        <select id="sortSelect">
+          <option value="name">Sort by name</option>
+          <option value="difficulty">Sort by difficulty</option>
+          <option value="equipment">Sort by equipment</option>
+        </select>
+      </div>
+      <div class="chip-row" id="muscleChips"></div>
+      <div class="exercise-list" id="exerciseList"></div>
+      <div class="footer-space"></div>
+    </section>
+
+    <section id="builderScreen" class="screen">
+      <div class="section-title">
+        <h2>Workout builder</h2>
+        <p>Make it as simple or as detailed as you want.</p>
+      </div>
+
+      <div class="card">
+        <div class="field-grid">
+          <div>
+            <label for="workoutName">Workout name</label>
+            <input id="workoutName" type="text" placeholder="Upper Body Strength" />
+          </div>
+          <div>
+            <label for="workoutDay">Day / split</label>
+            <input id="workoutDay" type="text" placeholder="Monday / Push" />
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div>
+            <label for="workoutGoal">Goal</label>
+            <select id="workoutGoal">
+              <option>Hypertrophy</option>
+              <option>Strength</option>
+              <option>General fitness</option>
+              <option>Athletic performance</option>
+              <option>Conditioning</option>
+            </select>
+          </div>
+          <div>
+            <label for="workoutDifficulty">Difficulty</label>
+            <select id="workoutDifficulty">
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="workoutNotes">Workout notes</label>
+          <textarea id="workoutNotes" placeholder="Focus on controlled eccentrics, 2–3 RIR on compounds, shorter rest on accessories..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Add exercise</h3>
+        <p class="sub">Choose from the library or make your own custom movement.</p>
+
+        <div class="field-grid three">
+          <div>
+            <label for="builderExerciseSelect">Exercise</label>
+            <select id="builderExerciseSelect"></select>
+          </div>
+          <div>
+            <label for="builderDefaultSets">Starting sets</label>
+            <input id="builderDefaultSets" type="number" min="1" max="10" value="3" />
+          </div>
+          <div>
+            <label for="builderExerciseMode">Source</label>
+            <select id="builderExerciseMode">
+              <option value="library">Library exercise</option>
+              <option value="custom">Custom exercise</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="customExerciseFields" style="display:none; margin-top:12px;">
+          <div class="field-grid">
+            <div>
+              <label for="customExerciseName">Custom exercise name</label>
+              <input id="customExerciseName" type="text" placeholder="Cable Y Raise" />
+            </div>
+            <div>
+              <label for="customExerciseMuscle">Muscle group</label>
+              <select id="customExerciseMuscle"></select>
+            </div>
+          </div>
+          <div class="field-grid">
+            <div>
+              <label for="customExerciseEquipment">Equipment</label>
+              <input id="customExerciseEquipment" type="text" placeholder="Cable machine" />
+            </div>
+            <div>
+              <label for="customExerciseDifficulty">Difficulty</label>
+              <select id="customExerciseDifficulty">
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row" style="margin-top:12px;">
+          <button class="btn btn-primary" onclick="addExerciseToBuilder()">Add to workout</button>
+          <button class="btn btn-secondary" onclick="switchScreen('libraryScreen')">Browse library first</button>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <h2>Current workout</h2>
+        <p>Add, remove, reorder, and fine-tune each set.</p>
+      </div>
+
+      <div id="builderWorkoutList"></div>
+
+      <div class="btn-row" style="margin:14px 0 24px;">
+        <button class="btn btn-success" onclick="saveWorkout()">Save workout</button>
+        <button class="btn btn-secondary" onclick="clearBuilder()">Clear builder</button>
+      </div>
+      <div class="footer-space"></div>
+    </section>
+
+    <section id="workoutsScreen" class="screen">
+      <div class="section-title">
+        <h2>Saved workouts</h2>
+        <p>Your routines stay saved in this browser.</p>
+      </div>
+      <div id="savedWorkouts"></div>
+      <div class="footer-space"></div>
+    </section>
+  </div>
+
+  <div class="tabbar">
+    <div class="tabs">
+      <button class="tab active" data-screen="homeScreen" onclick="switchScreen('homeScreen', this)">
+        <span class="icon">🏠</span><span>Home</span>
+      </button>
+      <button class="tab" data-screen="libraryScreen" onclick="switchScreen('libraryScreen', this)">
+        <span class="icon">📚</span><span>Library</span>
+      </button>
+      <button class="tab" data-screen="builderScreen" onclick="switchScreen('builderScreen', this)">
+        <span class="icon">🧱</span><span>Builder</span>
+      </button>
+      <button class="tab" data-screen="workoutsScreen" onclick="switchScreen('workoutsScreen', this)">
+        <span class="icon">💾</span><span>Workouts</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const EXERCISES = [
+      {name:"Barbell Bench Press", muscle:"Chest", equipment:"Barbell", difficulty:"Intermediate", type:"compound", demo:"press", cues:["Set shoulder blades back and down.","Lower to mid-chest with control.","Press up while keeping wrists stacked."], steps:["Lie with eyes under the bar.","Unrack and brace your torso.","Lower until elbows are just below the bench line.","Drive the bar back up in a slight arc."]},
+      {name:"Incline Dumbbell Press", muscle:"Chest", equipment:"Dumbbells", difficulty:"Beginner", type:"compound", demo:"press", cues:["Keep feet planted.","Lower dumbbells evenly.","Press up without banging them together."], steps:["Set bench to a low incline.","Start dumbbells at shoulder level.","Lower slowly until elbows are near 90°.","Press back up over the upper chest."]},
+      {name:"Push-Up", muscle:"Chest", equipment:"Bodyweight", difficulty:"Beginner", type:"compound", demo:"pushup", cues:["Keep body in one straight line.","Hands just outside shoulder width.","Push the floor away hard."], steps:["Set hands on floor under shoulders.","Brace glutes and core.","Lower chest toward the floor.","Press to full lockout."]},
+      {name:"Cable Chest Fly", muscle:"Chest", equipment:"Cable machine", difficulty:"Beginner", type:"isolation", demo:"fly", cues:["Soft bend in the elbows.","Bring hands together in an arc.","Control the stretch."], steps:["Set cables slightly above shoulder height.","Step forward into a split stance.","Sweep hands together in front of your chest.","Return with control."]},
+      {name:"Machine Chest Press", muscle:"Chest", equipment:"Machine", difficulty:"Beginner", type:"compound", demo:"press", cues:["Keep shoulders down.","Drive handles forward evenly.","Avoid shrugging."], steps:["Adjust seat so handles line up with chest.","Grip handles and brace your torso.","Press forward until arms extend.","Return slowly to start."]},
+
+      {name:"Lat Pulldown", muscle:"Back", equipment:"Cable machine", difficulty:"Beginner", type:"compound", demo:"pulldown", cues:["Pull elbows toward your ribs.","Keep chest lifted.","Do not yank with momentum."], steps:["Grip the bar just outside shoulder width.","Lean back slightly.","Pull the bar to upper chest.","Control the ascent back up."]},
+      {name:"Seated Cable Row", muscle:"Back", equipment:"Cable machine", difficulty:"Beginner", type:"compound", demo:"row", cues:["Lead with elbows.","Pause the squeeze.","Stay tall through the torso."], steps:["Sit tall with knees slightly bent.","Grab the handle and brace.","Row to the lower ribs.","Return under control."]},
+      {name:"One-Arm Dumbbell Row", muscle:"Back", equipment:"Dumbbell", difficulty:"Beginner", type:"compound", demo:"row", cues:["Flat back.","Pull elbow toward hip.","Avoid twisting."], steps:["Support one hand on a bench.","Let the dumbbell hang under shoulder.","Row toward your hip.","Lower slowly."]},
+      {name:"Pull-Up", muscle:"Back", equipment:"Pull-up bar", difficulty:"Advanced", type:"compound", demo:"pullup", cues:["Start from a dead hang.","Drive elbows down.","Keep ribs from flaring."], steps:["Grip the bar slightly wider than shoulders.","Hang with arms fully extended.","Pull chest toward bar.","Lower under control."]},
+      {name:"Romanian Deadlift", muscle:"Back", equipment:"Barbell", difficulty:"Intermediate", type:"compound", demo:"hinge", cues:["Hips back first.","Keep bar close.","Neutral spine throughout."], steps:["Stand tall with bar at thighs.","Push hips back with soft knees.","Lower until hamstrings are loaded.","Drive hips through to stand."]},
+
+      {name:"Dumbbell Shoulder Press", muscle:"Shoulders", equipment:"Dumbbells", difficulty:"Beginner", type:"compound", demo:"press", cues:["Brace ribs down.","Press slightly inward.","Control the descent."], steps:["Start seated or standing with dumbbells at shoulders.","Brace core.","Press overhead.","Lower back to shoulder height."]},
+      {name:"Lateral Raise", muscle:"Shoulders", equipment:"Dumbbells", difficulty:"Beginner", type:"isolation", demo:"lateral", cues:["Raise with elbows and hands together.","Stop around shoulder height.","Avoid swinging."], steps:["Stand tall with dumbbells at sides.","Lift arms out to the sides.","Pause briefly near shoulder level.","Lower slowly."]},
+      {name:"Rear Delt Fly", muscle:"Shoulders", equipment:"Dumbbells", difficulty:"Beginner", type:"isolation", demo:"fly-rear", cues:["Hinge slightly forward.","Open arms wide.","Squeeze upper back gently."], steps:["Hinge at the hips.","Hold dumbbells under chest.","Open arms out wide.","Return with control."]},
+      {name:"Arnold Press", muscle:"Shoulders", equipment:"Dumbbells", difficulty:"Intermediate", type:"compound", demo:"press", cues:["Rotate smoothly.","Keep elbows under hands.","Do not overarch."], steps:["Start palms facing you.","Rotate outward as you press up.","Reach overhead.","Reverse the motion to lower."]},
+      {name:"Face Pull", muscle:"Shoulders", equipment:"Cable machine", difficulty:"Beginner", type:"isolation", demo:"facepull", cues:["Pull rope toward nose or forehead.","Elbows high.","Finish with external rotation."], steps:["Set rope at face height.","Step back and brace.","Pull rope apart toward your face.","Return slowly."]},
+
+      {name:"Barbell Curl", muscle:"Biceps", equipment:"Barbell", difficulty:"Beginner", type:"isolation", demo:"curl", cues:["Elbows stay near the torso.","Squeeze at the top.","No back swing."], steps:["Stand tall with bar at thighs.","Curl toward shoulders.","Pause briefly.","Lower slowly."]},
+      {name:"Hammer Curl", muscle:"Biceps", equipment:"Dumbbells", difficulty:"Beginner", type:"isolation", demo:"curl", cues:["Neutral grip.","Keep shoulders relaxed.","Control every rep."], steps:["Hold dumbbells by your sides.","Curl with palms facing each other.","Pause near shoulders.","Lower under control."]},
+      {name:"Incline Dumbbell Curl", muscle:"Biceps", equipment:"Dumbbells", difficulty:"Intermediate", type:"isolation", demo:"curl", cues:["Shoulders stay back on bench.","Full stretch at bottom.","Don't swing."], steps:["Sit on incline bench with arms hanging.","Curl both dumbbells up.","Squeeze biceps.","Lower fully."]},
+      {name:"Cable Curl", muscle:"Biceps", equipment:"Cable machine", difficulty:"Beginner", type:"isolation", demo:"curl", cues:["Constant tension.","Elbows still.","Smooth tempo."], steps:["Stand facing low cable.","Grip straight or EZ attachment.","Curl to shoulder height.","Lower slowly."]},
+      {name:"Preacher Curl", muscle:"Biceps", equipment:"EZ bar / machine", difficulty:"Intermediate", type:"isolation", demo:"curl", cues:["Upper arm glued to pad.","Full control.","Avoid bouncing off the bottom."], steps:["Set upper arm on preacher pad.","Curl weight upward.","Pause and squeeze.","Lower with control."]},
+
+      {name:"Cable Pushdown", muscle:"Triceps", equipment:"Cable machine", difficulty:"Beginner", type:"isolation", demo:"pushdown", cues:["Pin elbows to sides.","Extend fully.","Don’t let shoulders roll forward."], steps:["Stand tall at high pulley.","Grip the rope or bar.","Press hands down until elbows lock.","Return under control."]},
+      {name:"Overhead Triceps Extension", muscle:"Triceps", equipment:"Dumbbell / cable", difficulty:"Beginner", type:"isolation", demo:"overhead", cues:["Keep elbows close.","Stretch at the bottom.","Brace ribs down."], steps:["Hold weight overhead.","Bend elbows to lower behind head.","Extend back to start.","Keep upper arms mostly still."]},
+      {name:"Skull Crusher", muscle:"Triceps", equipment:"EZ bar", difficulty:"Intermediate", type:"isolation", demo:"skull", cues:["Hinge at elbows, not shoulders.","Lower near forehead.","Press back to lockout."], steps:["Lie on bench holding EZ bar above chest.","Bend elbows to lower bar.","Stop near forehead.","Extend back up."]},
+      {name:"Bench Dip", muscle:"Triceps", equipment:"Bench", difficulty:"Beginner", type:"compound", demo:"dip", cues:["Shoulders down.","Bend elbows straight back.","Use a range you can control."], steps:["Place hands on edge of bench.","Slide hips forward.","Lower by bending elbows.","Press up."]},
+      {name:"Close-Grip Bench Press", muscle:"Triceps", equipment:"Barbell", difficulty:"Intermediate", type:"compound", demo:"press", cues:["Hands narrower than normal bench.","Elbows tuck more.","Drive evenly off the chest."], steps:["Set up like a bench press.","Grip slightly inside shoulder width.","Lower to lower chest.","Press back to lockout."]},
+
+      {name:"Back Squat", muscle:"Quads", equipment:"Barbell", difficulty:"Intermediate", type:"compound", demo:"squat", cues:["Brace before every rep.","Knees track over toes.","Drive up through mid-foot."], steps:["Set bar on upper traps.","Stand with feet shoulder width.","Sit down and between your hips.","Stand back up strongly."]},
+      {name:"Front Squat", muscle:"Quads", equipment:"Barbell", difficulty:"Advanced", type:"compound", demo:"squat", cues:["Elbows high.","Stay upright.","Push knees forward."], steps:["Rack bar on front delts.","Lift elbows high.","Squat down keeping torso tall.","Stand to full extension."]},
+      {name:"Leg Press", muscle:"Quads", equipment:"Machine", difficulty:"Beginner", type:"compound", demo:"legpress", cues:["Full foot on platform.","Control depth.","Drive through feet evenly."], steps:["Sit in machine and set feet shoulder width.","Unlock sled.","Lower until knees bend deeply.","Press back up without locking hard."]},
+      {name:"Bulgarian Split Squat", muscle:"Quads", equipment:"Bodyweight / dumbbells", difficulty:"Intermediate", type:"compound", demo:"split", cues:["Front foot planted.","Torso slightly forward.","Drop straight down."], steps:["Elevate rear foot behind you.","Step front foot forward.","Lower into split squat.","Drive back up through front leg."]},
+      {name:"Leg Extension", muscle:"Quads", equipment:"Machine", difficulty:"Beginner", type:"isolation", demo:"extension", cues:["Control the top.","Pause on contraction.","Lower slowly."], steps:["Sit in the machine and align knee joint.","Extend knees upward.","Squeeze quads.","Return slowly."]},
+
+      {name:"Hip Thrust", muscle:"Hamstrings & Glutes", equipment:"Barbell", difficulty:"Intermediate", type:"compound", demo:"thrust", cues:["Chin tucked.","Drive through heels.","Squeeze glutes at top."], steps:["Rest upper back on bench.","Place bar over hips.","Drop hips down.","Drive hips up until torso is parallel."]},
+      {name:"Leg Curl", muscle:"Hamstrings & Glutes", equipment:"Machine", difficulty:"Beginner", type:"isolation", demo:"curl-leg", cues:["Curl through full range.","Hips stay planted.","Lower slowly."], steps:["Set machine to your leg length.","Curl heels toward glutes.","Pause briefly.","Lower with control."]},
+      {name:"Good Morning", muscle:"Hamstrings & Glutes", equipment:"Barbell", difficulty:"Advanced", type:"compound", demo:"hinge", cues:["Soft knees.","Long spine.","Hinge instead of squatting."], steps:["Place bar on upper back.","Push hips back.","Lower torso until hamstrings load.","Drive hips through to stand."]},
+      {name:"Glute Bridge", muscle:"Hamstrings & Glutes", equipment:"Bodyweight / barbell", difficulty:"Beginner", type:"compound", demo:"thrust", cues:["Brace core.","Push through heels.","Full squeeze at top."], steps:["Lie on your back with knees bent.","Drive heels into floor.","Lift hips up.","Lower slowly."]},
+      {name:"Walking Lunge", muscle:"Hamstrings & Glutes", equipment:"Bodyweight / dumbbells", difficulty:"Intermediate", type:"compound", demo:"lunge", cues:["Long stride.","Stay balanced.","Push through front leg."], steps:["Step forward into a lunge.","Lower rear knee toward floor.","Drive up and step through.","Repeat on opposite side."]},
+
+      {name:"Standing Calf Raise", muscle:"Calves", equipment:"Machine / bodyweight", difficulty:"Beginner", type:"isolation", demo:"calf", cues:["Rise high on toes.","Pause at top.","Use full stretch at bottom."], steps:["Stand with balls of feet supported.","Drop heels for stretch.","Push up onto toes.","Lower with control."]},
+      {name:"Seated Calf Raise", muscle:"Calves", equipment:"Machine", difficulty:"Beginner", type:"isolation", demo:"calf", cues:["Smooth tempo.","Pause both top and bottom.","Keep knees still."], steps:["Sit with pads over thighs.","Lower heels down.","Raise heels high.","Return slowly."]},
+      {name:"Single-Leg Calf Raise", muscle:"Calves", equipment:"Bodyweight", difficulty:"Beginner", type:"isolation", demo:"calf", cues:["Use a wall for balance if needed.","Full range.","Stay controlled."], steps:["Stand on one foot.","Drop heel slightly.","Rise onto toes.","Repeat and switch sides."]},
+      {name:"Leg Press Calf Raise", muscle:"Calves", equipment:"Machine", difficulty:"Beginner", type:"isolation", demo:"calf", cues:["Only ankle joint moves.","Control each rep.","Don’t bounce."], steps:["Place balls of feet low on platform.","Unlock sled safely.","Lower heels.","Press through toes."]},
+      {name:"Donkey Calf Raise", muscle:"Calves", equipment:"Machine", difficulty:"Intermediate", type:"isolation", demo:"calf", cues:["Deep stretch.","Strong top contraction.","Steady rhythm."], steps:["Set hips under pad.","Bend at hips slightly.","Lower heels.","Drive onto toes."]},
+
+      {name:"Plank", muscle:"Core", equipment:"Bodyweight", difficulty:"Beginner", type:"isometric", demo:"plank", cues:["Squeeze glutes.","Ribs down.","Push floor away."], steps:["Set forearms on floor.","Extend legs behind you.","Keep body straight.","Hold while breathing."]},
+      {name:"Dead Bug", muscle:"Core", equipment:"Bodyweight", difficulty:"Beginner", type:"control", demo:"deadbug", cues:["Lower back stays down.","Move slowly.","Exhale on reach."], steps:["Lie on back with arms and knees up.","Reach opposite arm and leg away.","Return to center.","Switch sides."]},
+      {name:"Hanging Leg Raise", muscle:"Core", equipment:"Pull-up bar", difficulty:"Advanced", type:"compound", demo:"legraise", cues:["Avoid swinging.","Lift with abs, not momentum.","Control the lowering phase."], steps:["Hang from bar.","Brace core.","Raise legs up in front.","Lower slowly."]},
+      {name:"Russian Twist", muscle:"Core", equipment:"Bodyweight / plate", difficulty:"Beginner", type:"rotation", demo:"twist", cues:["Tall chest.","Rotate through torso.","Stay controlled."], steps:["Sit with heels down or lifted.","Lean back slightly.","Rotate side to side.","Keep rhythm smooth."]},
+      {name:"Ab Wheel Rollout", muscle:"Core", equipment:"Ab wheel", difficulty:"Advanced", type:"anti-extension", demo:"rollout", cues:["Brace hard before moving.","Only go as far as you can control.","Pull back with abs."], steps:["Kneel with wheel under shoulders.","Roll forward slowly.","Stop before lower back arches.","Pull back to start."]}
+    ];
+
+    const templates = {
+      push: {name:"Push Day", day:"Push", goal:"Hypertrophy", difficulty:"Intermediate", notes:"Focus on quality pressing and controlled accessory work.", exercises:["Barbell Bench Press","Incline Dumbbell Press","Dumbbell Shoulder Press","Lateral Raise","Cable Pushdown"]},
+      pull: {name:"Pull Day", day:"Pull", goal:"Hypertrophy", difficulty:"Intermediate", notes:"Drive elbows on rows and pulldowns, control the lowering phase.", exercises:["Lat Pulldown","Seated Cable Row","One-Arm Dumbbell Row","Face Pull","Barbell Curl"]},
+      legs: {name:"Leg Day", day:"Legs", goal:"Strength", difficulty:"Intermediate", notes:"Brace hard on compounds and use full range where comfortable.", exercises:["Back Squat","Romanian Deadlift","Leg Press","Hip Thrust","Standing Calf Raise"]}
+    };
+
+    const muscleGroups = ["All", ...new Set(EXERCISES.map(e => e.muscle))];
+    let selectedMuscle = "All";
+    let builderWorkout = [];
+    let librarySearch = "";
+
+    function switchScreen(screenId, tabButton){
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      const target = tabButton || document.querySelector(`.tab[data-screen="${screenId}"]`);
+      if(target) target.classList.add('active');
+    }
+
+    function saveToStorage(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+    function loadFromStorage(key, fallback){
+      try{ return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+      catch{ return fallback; }
+    }
+    function getSavedWorkouts(){ return loadFromStorage('forge_saved_workouts', []); }
+
+    function updateCounts(){
+      const saved = getSavedWorkouts();
+      document.getElementById('savedCountPill').textContent = `${saved.length} saved`;
+      document.getElementById('homeWorkoutCount').textContent = saved.length;
+      document.getElementById('homeExerciseCount').textContent = EXERCISES.length;
+    }
+
+    function fillExerciseSelects(){
+      const builderSelect = document.getElementById('builderExerciseSelect');
+      const muscleSelect = document.getElementById('customExerciseMuscle');
+      builderSelect.innerHTML = '';
+      muscleSelect.innerHTML = '';
+
+      const grouped = {};
+      EXERCISES.forEach(ex => {
+        if(!grouped[ex.muscle]) grouped[ex.muscle] = [];
+        grouped[ex.muscle].push(ex);
+      });
+
+      Object.keys(grouped).sort().forEach(group => {
+        const og = document.createElement('optgroup');
+        og.label = group;
+        grouped[group].sort((a,b) => a.name.localeCompare(b.name)).forEach(ex => {
+          const opt = document.createElement('option');
+          opt.value = ex.name;
+          opt.textContent = `${ex.name} • ${ex.equipment}`;
+          og.appendChild(opt);
+        });
+        builderSelect.appendChild(og);
+      });
+
+      [...new Set(EXERCISES.map(e => e.muscle))].sort().forEach(group => {
+        const opt = document.createElement('option');
+        opt.value = group;
+        opt.textContent = group;
+        muscleSelect.appendChild(opt);
+      });
+    }
+
+    function renderMuscleChips(){
+      const row = document.getElementById('muscleChips');
+      row.innerHTML = '';
+      muscleGroups.forEach(group => {
+        const btn = document.createElement('button');
+        btn.className = `chip ${group === selectedMuscle ? 'active' : ''}`;
+        btn.textContent = group;
+        btn.onclick = () => {
+          selectedMuscle = group;
+          renderMuscleChips();
+          renderLibrary();
+        };
+        row.appendChild(btn);
+      });
+    }
+
+    function filterExercises(){
+      const sortMode = document.getElementById('sortSelect').value;
+      let items = EXERCISES.filter(ex => {
+        const matchesMuscle = selectedMuscle === 'All' || ex.muscle === selectedMuscle;
+        const matchesSearch = [ex.name, ex.muscle, ex.equipment, ex.difficulty, ex.type].join(' ').toLowerCase().includes(librarySearch.toLowerCase());
+        return matchesMuscle && matchesSearch;
+      });
+
+      items.sort((a,b) => {
+        if(sortMode === 'difficulty') return a.difficulty.localeCompare(b.difficulty) || a.name.localeCompare(b.name);
+        if(sortMode === 'equipment') return a.equipment.localeCompare(b.equipment) || a.name.localeCompare(b.name);
+        return a.name.localeCompare(b.name);
+      });
+      return items;
+    }
+
+    function demoSVG(type){
+      const shared = `
+        <defs>
+          <linearGradient id="glow" x1="0" x2="1">
+            <stop offset="0%" stop-color="#7c5cff"/>
+            <stop offset="100%" stop-color="#2dd4bf"/>
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="26" r="10" fill="url(#glow)" opacity=".95"/>
+        <line x1="50" y1="36" x2="50" y2="72" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <line x1="50" y1="49" x2="30" y2="63" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <line x1="50" y1="49" x2="70" y2="63" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <line x1="50" y1="72" x2="36" y2="102" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <line x1="50" y1="72" x2="64" y2="102" stroke="white" stroke-width="7" stroke-linecap="round"/>
+      `;
+      const barTop = `<line x1="20" y1="16" x2="80" y2="16" stroke="url(#glow)" stroke-width="6" stroke-linecap="round"/>`;
+      const floor = `<line x1="8" y1="110" x2="92" y2="110" stroke="rgba(255,255,255,.15)" stroke-width="2" stroke-linecap="round"/>`;
+
+      switch(type){
+        case 'press':
+          return `<svg viewBox="0 0 100 120">${shared}${barTop}<animateTransform attributeName="transform" type="translate" values="0 0; 0 -8; 0 0" dur="1.8s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'pushup':
+          return `<svg viewBox="0 0 100 120"><defs><linearGradient id="glow2" x1="0" x2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>${floor}<circle cx="70" cy="44" r="8" fill="url(#glow2)"><animate attributeName="cy" values="44;54;44" dur="1.8s" repeatCount="indefinite"/></circle><line x1="63" y1="48" x2="40" y2="64" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="y2" values="64;76;64" dur="1.8s" repeatCount="indefinite"/></line><line x1="40" y1="64" x2="20" y2="76" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="y1" values="64;76;64" dur="1.8s" repeatCount="indefinite"/><animate attributeName="y2" values="76;92;76" dur="1.8s" repeatCount="indefinite"/></line><line x1="50" y1="58" x2="36" y2="92" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="y2" values="92;102;92" dur="1.8s" repeatCount="indefinite"/></line><line x1="50" y1="58" x2="64" y2="92" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="y2" values="92;102;92" dur="1.8s" repeatCount="indefinite"/></line></svg>`;
+        case 'row':
+          return `<svg viewBox="0 0 100 120">${shared}<line x1="16" y1="56" x2="34" y2="62" stroke="url(#glow)" stroke-width="5" stroke-linecap="round"/><line x1="66" y1="62" x2="84" y2="56" stroke="url(#glow)" stroke-width="5" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="0 0; 0 2; 0 0" dur="1.6s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'pulldown':
+          return `<svg viewBox="0 0 100 120">${shared}<line x1="18" y1="16" x2="82" y2="16" stroke="url(#glow)" stroke-width="6" stroke-linecap="round"/><line x1="30" y1="16" x2="38" y2="28" stroke="url(#glow)" stroke-width="4" stroke-linecap="round"/><line x1="70" y1="16" x2="62" y2="28" stroke="url(#glow)" stroke-width="4" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="0 0; 0 6; 0 0" dur="1.8s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'pullup':
+          return `<svg viewBox="0 0 100 120">${shared}<line x1="18" y1="14" x2="82" y2="14" stroke="url(#glow)" stroke-width="6" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="0 10; 0 0; 0 10" dur="1.8s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'hinge':
+          return `<svg viewBox="0 0 100 120"><defs><linearGradient id="glow3" x1="0" x2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>${floor}<circle cx="60" cy="28" r="10" fill="url(#glow3)"><animate attributeName="cx" values="60;66;60" dur="1.7s" repeatCount="indefinite"/><animate attributeName="cy" values="28;36;28" dur="1.7s" repeatCount="indefinite"/></circle><line x1="60" y1="38" x2="50" y2="72" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x1" values="60;66;60" dur="1.7s" repeatCount="indefinite"/><animate attributeName="y1" values="38;46;38" dur="1.7s" repeatCount="indefinite"/></line><line x1="50" y1="50" x2="28" y2="60" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/><animate attributeName="y1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/></line><line x1="50" y1="50" x2="68" y2="66" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/><animate attributeName="y1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/></line><line x1="50" y1="72" x2="38" y2="103" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/></line><line x1="50" y1="72" x2="63" y2="102" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x1" values="50;56;50" dur="1.7s" repeatCount="indefinite"/></line></svg>`;
+        case 'lateral':
+          return `<svg viewBox="0 0 100 120">${shared}<animateTransform attributeName="transform" type="rotate" values="0 50 50; -12 50 50; 0 50 50; 12 50 50; 0 50 50" dur="2s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'squat':
+          return `<svg viewBox="0 0 100 120">${shared}${barTop}<animateTransform attributeName="transform" type="translate" values="0 0; 0 12; 0 0" dur="1.9s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'legpress':
+          return `<svg viewBox="0 0 100 120"><defs><linearGradient id="glow4" x1="0" x2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>${floor}<line x1="20" y1="26" x2="82" y2="80" stroke="rgba(255,255,255,.18)" stroke-width="4"/><rect x="56" y="58" width="18" height="18" rx="4" fill="url(#glow4)"><animate attributeName="x" values="56;46;56" dur="1.9s" repeatCount="indefinite"/></rect><circle cx="28" cy="48" r="8" fill="url(#glow4)"/><line x1="34" y1="52" x2="48" y2="66" stroke="white" stroke-width="6" stroke-linecap="round"/><line x1="48" y1="66" x2="62" y2="66" stroke="white" stroke-width="6" stroke-linecap="round"/><line x1="48" y1="66" x2="40" y2="86" stroke="white" stroke-width="6" stroke-linecap="round"/><line x1="62" y1="66" x2="72" y2="74" stroke="white" stroke-width="6" stroke-linecap="round"><animate attributeName="x2" values="72;62;72" dur="1.9s" repeatCount="indefinite"/></line></svg>`;
+        case 'split':
+        case 'lunge':
+          return `<svg viewBox="0 0 100 120">${shared}<line x1="50" y1="72" x2="30" y2="102" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="50" y1="72" x2="70" y2="96" stroke="white" stroke-width="7" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="0 0; 0 8; 0 0" dur="1.9s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'calf':
+          return `<svg viewBox="0 0 100 120">${shared}<animateTransform attributeName="transform" type="translate" values="0 8; 0 0; 0 8" dur="1.4s" repeatCount="indefinite"/>${floor}</svg>`;
+        case 'plank':
+          return `<svg viewBox="0 0 100 120"><defs><linearGradient id="glow5" x1="0" x2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>${floor}<circle cx="74" cy="48" r="8" fill="url(#glow5)"/><line x1="66" y1="52" x2="42" y2="58" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="42" y1="58" x2="20" y2="88" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="52" y1="55" x2="62" y2="88" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="42" y1="58" x2="24" y2="60" stroke="white" stroke-width="7" stroke-linecap="round"/></svg>`;
+        case 'deadbug':
+          return `<svg viewBox="0 0 100 120"><defs><linearGradient id="glow6" x1="0" x2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>${floor}<circle cx="50" cy="84" r="8" fill="url(#glow6)"/><line x1="50" y1="76" x2="50" y2="52" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="50" y1="64" x2="28" y2="48" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x2" values="28;18;28" dur="1.8s" repeatCount="indefinite"/><animate attributeName="y2" values="48;42;48" dur="1.8s" repeatCount="indefinite"/></line><line x1="50" y1="64" x2="72" y2="48" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="50" y1="52" x2="30" y2="26" stroke="white" stroke-width="7" stroke-linecap="round"/><line x1="50" y1="52" x2="70" y2="26" stroke="white" stroke-width="7" stroke-linecap="round"><animate attributeName="x2" values="70;80;70" dur="1.8s" repeatCount="indefinite"/><animate attributeName="y2" values="26;20;26" dur="1.8s" repeatCount="indefinite"/></line></svg>`;
+        default:
+          return `<svg viewBox="0 0 100 120">${shared}${floor}</svg>`;
+      }
+    }
+
+    function renderLibrary(){
+      const list = document.getElementById('exerciseList');
+      const sortMode = document.getElementById('sortSelect').value;
+      let items = EXERCISES.filter(ex => {
+        const matchesMuscle = selectedMuscle === 'All' || ex.muscle === selectedMuscle;
+        const matchesSearch = [ex.name, ex.muscle, ex.equipment, ex.difficulty, ex.type].join(' ').toLowerCase().includes(librarySearch.toLowerCase());
+        return matchesMuscle && matchesSearch;
+      });
+      items.sort((a,b) => {
+        if(sortMode === 'difficulty') return a.difficulty.localeCompare(b.difficulty) || a.name.localeCompare(b.name);
+        if(sortMode === 'equipment') return a.equipment.localeCompare(b.equipment) || a.name.localeCompare(b.name);
+        return a.name.localeCompare(b.name);
+      });
+
+      list.innerHTML = '';
+      if(!items.length){
+        list.innerHTML = '<div class="empty">No exercises match that search yet.</div>';
+        return;
+      }
+
+      items.forEach(ex => {
+        const card = document.createElement('div');
+        card.className = 'exercise-card';
+        card.innerHTML = `
+          <div class="exercise-head">
+            <div>
+              <h4>${ex.name}</h4>
+              <div class="tag-row">
+                <span class="tag">${ex.muscle}</span>
+                <span class="tag">${ex.equipment}</span>
+                <span class="tag">${ex.difficulty}</span>
+                <span class="tag">${ex.type}</span>
+              </div>
+            </div>
+            <button class="btn btn-small btn-primary" onclick="quickAddFromLibrary('${ex.name.replaceAll("'", "\\'")}')">Add</button>
+          </div>
+          <div class="demo-box">
+            <div class="demo-stage">${demoSVG(ex.demo)}</div>
+            <div class="demo-caption">
+              <p><strong>Coaching cues:</strong> ${ex.cues.join(' ')}</p>
+              <ol class="demo-steps">${ex.steps.map(step => `<li>${step}</li>`).join('')}</ol>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function builderModeChanged(){
+      const mode = document.getElementById('builderExerciseMode').value;
+      document.getElementById('customExerciseFields').style.display = mode === 'custom' ? 'block' : 'none';
+    }
+
+    function makeDefaultSet(index){ return { setNumber:index+1, reps:10, weight:"", rest:90, tempo:"2-0-2", rpe:"8", note:"" }; }
+    function cryptoRandomId(){ return Math.random().toString(36).slice(2, 10); }
+
+    function buildExerciseObjectFromName(name, initialSets){
+      const found = EXERCISES.find(e => e.name === name);
+      const setCount = Number(initialSets) || 3;
+      return {
+        id: cryptoRandomId(),
+        name: found?.name || name,
+        muscle: found?.muscle || 'Custom',
+        equipment: found?.equipment || 'Custom',
+        difficulty: found?.difficulty || 'Beginner',
+        notes:"",
+        sets: Array.from({length:setCount}, (_,i) => makeDefaultSet(i))
+      };
+    }
+
+    function addExerciseToBuilder(prefillName){
+      const mode = document.getElementById('builderExerciseMode').value;
+      const setCount = document.getElementById('builderDefaultSets').value || 3;
+
+      if(mode === 'custom'){
+        const name = document.getElementById('customExerciseName').value.trim();
+        if(!name){ alert('Add a custom exercise name first.'); return; }
+        builderWorkout.push({
+          id: cryptoRandomId(),
+          name,
+          muscle: document.getElementById('customExerciseMuscle').value,
+          equipment: document.getElementById('customExerciseEquipment').value.trim() || 'Custom',
+          difficulty: document.getElementById('customExerciseDifficulty').value,
+          notes:"",
+          sets: Array.from({length:Number(setCount) || 3}, (_,i) => makeDefaultSet(i))
+        });
+      } else {
+        const exerciseName = prefillName || document.getElementById('builderExerciseSelect').value;
+        builderWorkout.push(buildExerciseObjectFromName(exerciseName, setCount));
+      }
+
+      renderBuilderWorkout();
+      switchScreen('builderScreen');
+    }
+
+    function quickAddFromLibrary(name){
+      builderWorkout.push(buildExerciseObjectFromName(name, 3));
+      renderBuilderWorkout();
+      switchScreen('builderScreen');
+    }
+
+    function renderBuilderWorkout(){
+      const wrap = document.getElementById('builderWorkoutList');
+      wrap.innerHTML = '';
+      if(!builderWorkout.length){
+        wrap.innerHTML = '<div class="empty">No exercises in this workout yet. Add one from the builder or library.</div>';
+        return;
+      }
+
+      builderWorkout.forEach((exercise, index) => {
+        const el = document.createElement('div');
+        el.className = 'builder-exercise';
+        el.innerHTML = `
+          <div class="builder-top">
+            <div>
+              <h4>${index + 1}. ${exercise.name}</h4>
+              <p>${exercise.muscle} • ${exercise.equipment} • ${exercise.difficulty}</p>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-small btn-secondary" onclick="moveExercise(${index}, -1)">↑</button>
+              <button class="btn btn-small btn-secondary" onclick="moveExercise(${index}, 1)">↓</button>
+              <button class="btn btn-small btn-secondary" onclick="duplicateExercise(${index})">Duplicate</button>
+              <button class="btn btn-small btn-danger" onclick="removeExercise(${index})">Remove</button>
+            </div>
+          </div>
+
+          <div style="margin-bottom:10px;">
+            <label>Exercise notes</label>
+            <textarea placeholder="Optional coaching note, target reps in reserve, special tempo..." oninput="updateExerciseNote(${index}, this.value)">${exercise.notes || ''}</textarea>
+          </div>
+
+          <div class="set-table">
+            ${exercise.sets.map((set, setIndex) => `
+              <div class="set-row">
+                <div class="set-label">Set ${set.setNumber}</div>
+                <input type="number" min="1" placeholder="Reps" value="${set.reps}" oninput="updateSet(${index}, ${setIndex}, 'reps', this.value)" />
+                <input type="text" placeholder="Weight" value="${set.weight}" oninput="updateSet(${index}, ${setIndex}, 'weight', this.value)" />
+                <input type="number" min="0" placeholder="Rest (sec)" value="${set.rest}" oninput="updateSet(${index}, ${setIndex}, 'rest', this.value)" />
+                <input type="text" placeholder="Tempo" value="${set.tempo}" oninput="updateSet(${index}, ${setIndex}, 'tempo', this.value)" />
+                <button class="btn btn-small btn-danger remove-set" onclick="removeSet(${index}, ${setIndex})">✕</button>
+              </div>
+              <div class="field-grid" style="margin-top:8px;">
+                <div>
+                  <label>RPE</label>
+                  <input type="text" placeholder="8" value="${set.rpe}" oninput="updateSet(${index}, ${setIndex}, 'rpe', this.value)" />
+                </div>
+                <div>
+                  <label>Optional set note</label>
+                  <input type="text" placeholder="Last set AMRAP / pause reps / etc." value="${set.note || ''}" oninput="updateSet(${index}, ${setIndex}, 'note', this.value)" />
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn btn-small btn-primary" onclick="addSet(${index})">Add set</button>
+          </div>
+        `;
+        wrap.appendChild(el);
+      });
+    }
+
+    function updateExerciseNote(exerciseIndex, value){ builderWorkout[exerciseIndex].notes = value; }
+    function updateSet(exerciseIndex, setIndex, key, value){ builderWorkout[exerciseIndex].sets[setIndex][key] = value; }
+
+    function addSet(exerciseIndex){
+      const sets = builderWorkout[exerciseIndex].sets;
+      sets.push({ setNumber: sets.length + 1, reps:10, weight:"", rest:90, tempo:"2-0-2", rpe:"8", note:"" });
+      renderBuilderWorkout();
+    }
+
+    function removeSet(exerciseIndex, setIndex){
+      const sets = builderWorkout[exerciseIndex].sets;
+      if(sets.length === 1){ alert('Each exercise should keep at least one set.'); return; }
+      sets.splice(setIndex, 1);
+      sets.forEach((set, i) => set.setNumber = i + 1);
+      renderBuilderWorkout();
+    }
+
+    function moveExercise(index, direction){
+      const target = index + direction;
+      if(target < 0 || target >= builderWorkout.length) return;
+      [builderWorkout[index], builderWorkout[target]] = [builderWorkout[target], builderWorkout[index]];
+      renderBuilderWorkout();
+    }
+
+    function duplicateExercise(index){
+      const copy = JSON.parse(JSON.stringify(builderWorkout[index]));
+      copy.id = cryptoRandomId();
+      builderWorkout.splice(index + 1, 0, copy);
+      renderBuilderWorkout();
+    }
+
+    function removeExercise(index){
+      builderWorkout.splice(index, 1);
+      renderBuilderWorkout();
+    }
+
+    function clearBuilder(){
+      if(!builderWorkout.length) return;
+      if(confirm('Clear the current builder?')){
+        builderWorkout = [];
+        renderBuilderWorkout();
+      }
+    }
+
+    function saveWorkout(){
+      const name = document.getElementById('workoutName').value.trim();
+      const day = document.getElementById('workoutDay').value.trim();
+      const goal = document.getElementById('workoutGoal').value;
+      const difficulty = document.getElementById('workoutDifficulty').value;
+      const notes = document.getElementById('workoutNotes').value.trim();
+      if(!name){ alert('Give your workout a name first.'); return; }
+      if(!builderWorkout.length){ alert('Add at least one exercise before saving.'); return; }
+
+      const saved = getSavedWorkouts();
+      saved.unshift({
+        id: cryptoRandomId(), name, day, goal, difficulty, notes,
+        createdAt: new Date().toLocaleString(),
+        exercises: JSON.parse(JSON.stringify(builderWorkout))
+      });
+
+      saveToStorage('forge_saved_workouts', saved);
+      renderSavedWorkouts();
+      updateCounts();
+      switchScreen('workoutsScreen');
+      resetBuilderForm();
+    }
+
+    function renderSavedWorkouts(){
+      const wrap = document.getElementById('savedWorkouts');
+      const saved = getSavedWorkouts();
+      wrap.innerHTML = '';
+      if(!saved.length){
+        wrap.innerHTML = '<div class="empty">No saved workouts yet. Build one and save it here.</div>';
+        return;
+      }
+
+      saved.forEach((workout, index) => {
+        const card = document.createElement('div');
+        card.className = 'workout-card';
+        card.innerHTML = `
+          <div>
+            <div class="exercise-head">
+              <div>
+                <h4 style="margin:0; font-size:1.12rem;">${workout.name}</h4>
+                <p class="sub" style="margin:6px 0 0;">Saved ${workout.createdAt}</p>
+              </div>
+              <button class="btn btn-small btn-danger" onclick="deleteWorkout(${index})">Delete</button>
+            </div>
+            <div class="workout-meta">
+              ${workout.day ? `<span class="tag">${workout.day}</span>` : ''}
+              <span class="tag">${workout.goal}</span>
+              <span class="tag">${workout.difficulty}</span>
+              <span class="tag">${workout.exercises.length} exercises</span>
+            </div>
+            ${workout.notes ? `<p class="muted" style="margin:10px 0 0;">${workout.notes}</p>` : ''}
+          </div>
+          <div class="grid">
+            ${workout.exercises.map(ex => `
+              <div class="exercise-mini">
+                <strong>${ex.name}</strong>
+                <span>${ex.muscle} • ${ex.sets.length} sets</span>
+                <span>${ex.sets.map(set => `${set.reps} reps${set.weight ? ` @ ${set.weight}` : ''}`).join(' · ')}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-small btn-secondary" onclick="loadWorkoutIntoBuilder(${index})">Edit in builder</button>
+          </div>
+        `;
+        wrap.appendChild(card);
+      });
+    }
+
+    function deleteWorkout(index){
+      const saved = getSavedWorkouts();
+      if(!confirm(`Delete "${saved[index].name}"?`)) return;
+      saved.splice(index, 1);
+      saveToStorage('forge_saved_workouts', saved);
+      renderSavedWorkouts();
+      updateCounts();
+    }
+
+    function loadWorkoutIntoBuilder(index){
+      const saved = getSavedWorkouts();
+      const workout = saved[index];
+      if(!workout) return;
+      document.getElementById('workoutName').value = workout.name || '';
+      document.getElementById('workoutDay').value = workout.day || '';
+      document.getElementById('workoutGoal').value = workout.goal || 'Hypertrophy';
+      document.getElementById('workoutDifficulty').value = workout.difficulty || 'Beginner';
+      document.getElementById('workoutNotes').value = workout.notes || '';
+      builderWorkout = JSON.parse(JSON.stringify(workout.exercises || []));
+      renderBuilderWorkout();
+      switchScreen('builderScreen');
+    }
+
+    function resetBuilderForm(){
+      document.getElementById('workoutName').value = '';
+      document.getElementById('workoutDay').value = '';
+      document.getElementById('workoutGoal').value = 'Hypertrophy';
+      document.getElementById('workoutDifficulty').value = 'Beginner';
+      document.getElementById('workoutNotes').value = '';
+      document.getElementById('builderDefaultSets').value = 3;
+      document.getElementById('builderExerciseMode').value = 'library';
+      document.getElementById('customExerciseName').value = '';
+      document.getElementById('customExerciseEquipment').value = '';
+      document.getElementById('customExerciseDifficulty').value = 'Beginner';
+      builderWorkout = [];
+      builderModeChanged();
+      renderBuilderWorkout();
+    }
+
+    function loadTemplate(key){
+      const tpl = templates[key];
+      if(!tpl) return;
+      document.getElementById('workoutName').value = tpl.name;
+      document.getElementById('workoutDay').value = tpl.day;
+      document.getElementById('workoutGoal').value = tpl.goal;
+      document.getElementById('workoutDifficulty').value = tpl.difficulty;
+      document.getElementById('workoutNotes').value = tpl.notes;
+      builderWorkout = tpl.exercises.map(name => buildExerciseObjectFromName(name, 3));
+      renderBuilderWorkout();
+      switchScreen('builderScreen');
+    }
+
+    function boot(){
+      fillExerciseSelects();
+      renderMuscleChips();
+      renderLibrary();
+      renderBuilderWorkout();
+      renderSavedWorkouts();
+      updateCounts();
+      document.getElementById('searchInput').addEventListener('input', (e) => { librarySearch = e.target.value; renderLibrary(); });
+      document.getElementById('sortSelect').addEventListener('change', renderLibrary);
+      document.getElementById('builderExerciseMode').addEventListener('change', builderModeChanged);
+    }
+
+    boot();
+  </script>
+</body>
+</html>
